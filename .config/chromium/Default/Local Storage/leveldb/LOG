@@ -1,0 +1,18 @@
+2025/06/29-11:01:55.996 4 Reusing MANIFEST /home/isra/.config/chromium/Default/Local Storage/leveldb/MANIFEST-000001
+2025/06/29-11:01:56.013 4 Recovering log #23
+2025/06/29-11:01:56.014 4 Reusing old log /home/isra/.config/chromium/Default/Local Storage/leveldb/000023.log 
+2025/06/29-11:07:18.120 6 Level-0 table #27: started
+2025/06/29-11:07:18.131 6 Level-0 table #27: 20905 bytes OK
+2025/06/29-11:07:18.136 6 Delete type=0 #23
+2025/06/29-11:07:18.137 6 Compacting 4@0 + 1@1 files
+2025/06/29-11:07:18.149 6 Generated table #28@0: 61 keys, 78947 bytes
+2025/06/29-11:07:18.149 6 Compacted 4@0 + 1@1 files => 78947 bytes
+2025/06/29-11:07:18.152 6 compacted to: files[ 0 1 1 0 0 0 0 ]
+2025/06/29-11:07:18.153 6 Delete type=2 #21
+2025/06/29-11:07:18.154 6 Delete type=2 #19
+2025/06/29-11:07:18.154 6 Delete type=2 #27
+2025/06/29-11:07:18.154 6 Delete type=2 #17
+2025/06/29-11:07:18.154 6 Delete type=2 #24
+2025/06/29-11:33:33.323 6 Level-0 table #30: started
+2025/06/29-11:33:33.332 6 Level-0 table #30: 14822 bytes OK
+2025/06/29-11:33:33.339 6 Delete type=0 #26

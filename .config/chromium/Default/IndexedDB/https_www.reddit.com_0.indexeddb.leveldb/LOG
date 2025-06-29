@@ -1,0 +1,6 @@
+2025/06/28-17:07:39.043 353 Creating DB /home/isra/.config/chromium/Default/IndexedDB/https_www.reddit.com_0.indexeddb.leveldb since it was missing.
+2025/06/28-17:07:39.055 353 Reusing MANIFEST /home/isra/.config/chromium/Default/IndexedDB/https_www.reddit.com_0.indexeddb.leveldb/MANIFEST-000001
+2025/06/28-17:08:11.058 354 Level-0 table #5: started
+2025/06/28-17:08:11.063 354 Level-0 table #5: 1384 bytes OK
+2025/06/28-17:08:11.066 354 Delete type=0 #3
+2025/06/28-17:08:11.067 354 Manual compaction at level-0 from (begin) .. (end); will stop at (end)

@@ -1,0 +1,6 @@
+2025/06/29-10:58:06.123 4 Reusing MANIFEST /home/isra/.config/chromium/Default/Local Storage/leveldb/MANIFEST-000001
+2025/06/29-10:58:06.137 4 Recovering log #20
+2025/06/29-10:58:06.139 4 Reusing old log /home/isra/.config/chromium/Default/Local Storage/leveldb/000020.log 
+2025/06/29-10:59:06.159 6 Level-0 table #24: started
+2025/06/29-10:59:06.167 6 Level-0 table #24: 29759 bytes OK
+2025/06/29-10:59:06.173 6 Delete type=0 #20
