@@ -23,7 +23,12 @@ NEXT_INDEX=$(( (INDEX + 1) % TOTAL ))
 FILE=$(ls "$WALLPAPER_DIR"/*.png "$WALLPAPER_DIR"/*.jpg | sed -n "$((NEXT_INDEX + 1))p")
 
 # Cambiar el fondo usando swww
-swww img "$FILE"
+swww img "$FILE" \
+--transition-type outer \
+--transition-pos 1,1 \
+--transition-duration 2 \
+--transition-fps 60
+--transition-angle 45
 
 # Guardar el nuevo índice
 echo "$NEXT_INDEX" > "$STATE_FILE"
