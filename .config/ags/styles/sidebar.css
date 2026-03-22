@@ -1,0 +1,98 @@
+.sidebar-container {
+  background: alpha(#1e1e2e, 0.92);
+  border-left: 1px solid alpha(#89b4fa, 0.2);
+  padding: 16px;
+  min-width: 320px;
+}
+
+.sidebar-header {
+  padding-bottom: 8px;
+  border-bottom: 1px solid alpha(#89b4fa, 0.15);
+}
+
+.sidebar-title {
+  color: #cdd6f4;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: #6c7086;
+  padding: 4px;
+  border-radius: 6px;
+}
+.close-btn:hover { color: #f38ba8; background: alpha(#f38ba8, 0.1); }
+
+/* Music Player */
+.music-player {
+  background: alpha(#313244, 0.6);
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid alpha(#89b4fa, 0.1);
+}
+
+.album-art-container {
+  min-width: 160px;
+  min-height: 160px;
+}
+
+.album-art {
+  min-width: 160px;
+  min-height: 160px;
+  border-radius: 12px;
+}
+
+.track-title {
+  color: #cdd6f4;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.track-artist {
+  color: #89b4fa;
+  font-size: 13px;
+}
+
+.progress-bar trough {
+  background: alpha(#45475a, 0.8);
+  border-radius: 999px;
+  min-height: 4px;
+}
+.progress-bar highlight {
+  background: #89b4fa;
+  border-radius: 999px;
+}
+
+.controls { padding: 4px 0; }
+
+.ctrl-btn {
+  background: alpha(#45475a, 0.5);
+  border: none;
+  border-radius: 50%;
+  padding: 8px;
+  color: #cdd6f4;
+  min-width: 36px;
+  min-height: 36px;
+}
+.ctrl-btn:hover { background: alpha(#89b4fa, 0.2); color: #89b4fa; }
+
+.play-pause {
+  background: #89b4fa;
+  color: #1e1e2e;
+  min-width: 44px;
+  min-height: 44px;
+}
+.play-pause:hover { background: #b4befe; }
+
+.volume-row { padding: 0 4px; }
+.volume-slider trough {
+  background: alpha(#45475a, 0.8);
+  min-height: 3px;
+  border-radius: 999px;
+}
+.volume-slider highlight {
+  background: #a6e3a1;
+  border-radius: 999px;
+}
