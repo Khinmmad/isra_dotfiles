@@ -3,6 +3,7 @@ import Gtk from "gi://Gtk?version=4.0"
 import { createState, createEffect } from "gnim"
 import app from "ags/gtk4/app"
 import MusicPlayer from "./MusicPlayer"
+import Weather from "./Weather"
 
 const [visible, setVisible] = createState(false)
 export const toggleSidebar = () => setVisible((v: boolean) => !v)
@@ -44,6 +45,7 @@ export default function Sidebar() {
   content.get_style_context().add_class("sidebar-container")
   content.append(header)
   content.append(music)
+  content.append(Weather() as any)
 
   win.set_child(content)
   return win

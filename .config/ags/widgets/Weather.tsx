@@ -1,7 +1,7 @@
 import { createState } from "gnim"
 import { fetch } from "gnim/fetch"
 
-const CITY = "Mexico+City"
+const CITY = "San+Julian+Jalisco"
 
 const weatherIcons: Record<number, string> = {
   113: "☀️", 116: "⛅", 119: "☁️", 122: "☁️",
