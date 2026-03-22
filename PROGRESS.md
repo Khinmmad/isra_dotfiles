@@ -13,11 +13,18 @@
 - Spicetify + Marketplace
 - Pacman ILoveCandy
 - Wallpaper switcher con rofi preview
-- AGS v2 corriendo (barra básica)
+- AGS v3 corriendo (barra básica)
 - Dotfiles en GitHub
+- AGS sidebar con music player (Spotify/MPRIS reactivo)
+  - Controles play/pause/next/prev
+  - Barra de progreso en tiempo real
+  - Control de volumen
+  - Se abre con click en módulo música de waybar
 
 ## Pendiente 🔧
-- AGS v2 sidebar completo (música, clima, notificaciones, temas)
+- AGS sidebar: clima
+- AGS sidebar: notificaciones
+- AGS sidebar: panel de temas
 - Waybar módulos extra
 - Animaciones de ventanas mejoradas
 - Scripts de utilidades
@@ -29,7 +36,8 @@
 ## Comandos importantes
 - Recargar waybar: pkill waybar && waybar &
 - Recargar hyprland: hyprctl reload
-- AGS: ags run ~/.config/ags/app.ts
+- AGS: cd ~/.config/ags && ags run app.ts --gtk 4 &
+- Toggle sidebar: ags toggle sidebar
 - Wallpaper selector: SUPER+SHIFT+W
 - Network manager: click en waybar o ronema
 - Lock: SUPER+L
