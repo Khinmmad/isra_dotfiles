@@ -1,10 +1,16 @@
 import app from "ags/gtk4/app"
-import style from "./style.scss"
-import Bar from "./widget/Bar"
+import GLib from "gi://GLib?version=2.0"
+import Sidebar from "./widgets/Sidebar"
+import Bar from "./widgets/Bar"
+
+const home = GLib.get_home_dir()
+const css = (f: string) => GLib.build_filenamev([home, ".config", "ags", "styles", f])
 
 app.start({
-  css: style,
+  css: css("sidebar.css"),
   main() {
-    app.get_monitors().map(Bar)
+    app.apply_css(css("bar.css"), false)
+    Sidebar()
+    Bar()
   },
 })

@@ -1,0 +1,43 @@
+* { font-family: "JetBrainsMono Nerd Font", "Noto Color Emoji", monospace; font-size: 14px; }
+
+.bar { background: transparent; padding: 0 8px; min-height: 36px; }
+.bar-section { padding: 0 4px; }
+
+.pill {
+  background: rgba(30, 100, 180, 0.35);
+  border: 1px solid rgba(100, 180, 255, 0.3);
+  border-radius: 20px;
+  padding: 4px 14px;
+  margin: 4px 2px;
+  color: #cdd6f4;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+.pill:hover { background: rgba(30, 120, 220, 0.55); border-color: rgba(100, 180, 255, 0.6); }
+
+.pill-cpu label     { color: #03e552; }
+.pill-memory label  { color: #f1fa8c; }
+.pill-battery label { color: #50fa7b; }
+.pill-volume label  { color: #bd93f9; }
+.pill-temp label    { color: #ffb86c; }
+.pill-clock label   { color: #ffffff; }
+.pill-music label   { color: #60d8f0; }
+.pill-network label { color: #89dceb; }
+.pill-temp .critical { color: #f38ba8; }
+
+.pill-power {
+  color: #72d3f6; font-size: 20px; padding: 0 14px;
+  background: rgba(30, 100, 180, 0.35);
+  border: 1px solid rgba(100, 180, 255, 0.3);
+  border-radius: 20px; margin: 4px 2px;
+}
+.pill-power:hover { background: rgba(134, 233, 231, 0.35); border-color: rgba(219, 219, 130, 0.5); }
+
+.workspaces { margin: 4px 2px; }
+.ws-btn {
+  background: rgba(30, 100, 180, 0.35);
+  border: 1px solid rgba(100, 180, 255, 0.3);
+  border-radius: 20px; padding: 2px 10px; margin: 0 2px;
+  color: #cdd6f4; min-width: 32px;
+}
+.ws-btn.active { background: rgba(100, 180, 255, 0.5); border-color: rgba(150, 210, 255, 0.8); color: #ffffff; }
+.ws-btn:hover { background: rgba(30, 120, 220, 0.55); }
