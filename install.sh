@@ -28,7 +28,7 @@ log_section() { echo -e "\n${CYAN}========== $1 ==========${NC}"; }
 PACMAN_PKGS=(
     # Sistema
     uwsm pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse
-    gst-plugin-pipewire wireplumber pavucontrol pamixer
+    gst-plugin-pipewire wireplumber pavucontrol pamixer libpulse
     networkmanager network-manager-applet
     bluez bluez-utils blueman
     brightnessctl playerctl udiskie
@@ -37,14 +37,21 @@ PACMAN_PKGS=(
     sddm qt5-quickcontrols qt5-quickcontrols2 qt5-graphicaleffects
 
     # Window Manager
-    hyprland hyprlock hypridle dunst rofi waybar swww
+    # waybar  # legacy — reemplazado por AGS
+    hyprland hyprlock hypridle dunst rofi
     wlogout grim slurp wl-clipboard hyprpicker satty
     cliphist wl-clip-persist hyprsunset
+
+    # AGS / GJS
+    gjs npm
 
     # Dependencias
     polkit-gnome xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
     xdg-user-dirs pacman-contrib parallel jq imagemagick
     qt5-imageformats ffmpegthumbs libnotify noto-fonts-emoji
+
+    # Fuentes
+    ttf-jetbrains-mono-nerd
 
     # Theming
     nwg-look qt5ct qt6ct kvantum kvantum-qt5 qt5-wayland qt6-wayland
@@ -52,24 +59,26 @@ PACMAN_PKGS=(
     # Aplicaciones
     firefox kitty thunar thunar-archive-plugin thunar-media-tags-plugin
     tumbler ffmpegthumbnailer ark unzip vim wofi
-    nwg-displays nwg-look fzf
+    nwg-displays fzf
 
     # Shell
     zsh zsh-syntax-highlighting zsh-autosuggestions fastfetch lsd
 
     # Audio/Utils
     alsa-utils
-    
+
     # Yazi
-    yazi ffmpeg p7zip poppler fd ripgrep zoxide imagemagick
+    yazi ffmpeg p7zip poppler fd ripgrep zoxide
 )
 
 AUR_PKGS=(
+    awww                      # wallpaper daemon (antes swww)
     eww-wayland
     spicetify-cli
     sddm-sugar-candy-git
     tokyonight-gtk-theme-git
-    aylurs-gtk-shell
+    aylurs-gtk-shell           # AGS v3
+    astal-mpris                # MPRIS para AGS (MusicPlayer)
 )
 
 # ============================================
@@ -132,6 +141,11 @@ install_ronema() {
 
 install_spicetify_marketplace() {
     log_section "Instalando Spicetify Marketplace"
+    if ! command -v spotify &>/dev/null; then
+        log_warn "Spotify no está instalado — saltando Spicetify Marketplace"
+        log_warn "Instala Spotify manualmente y ejecuta este paso después"
+        return 0
+    fi
     curl -fsSL https://raw.githubusercontent.com/spicetify/marketplace/main/resources/install.sh | sh
     log_success "Spicetify Marketplace instalado"
 }
@@ -162,6 +176,11 @@ install_rofi_nerd_themes() {
 
 install_ags() {
     log_section "Configurando AGS"
+    # Guard: asegurarse de que copy_configs ya corrió
+    if [ ! -d "$CONFIG_DIR/ags" ]; then
+        log_error "~/.config/ags no existe — copy_configs falló o no se ejecutó"
+        return 1
+    fi
     cd "$CONFIG_DIR/ags"
     npm install
     log_success "AGS configurado"
@@ -182,6 +201,7 @@ backup_configs() {
 
 copy_configs() {
     log_section "Copiando configs"
+    # waybar se copia como referencia legacy pero AGS es la barra activa
     for dir in waybar hypr kitty ronema fastfetch eww swww dunst wofi rofi spicetify yazi nwg-look gtk-3.0 gtk-4.0 ags; do
         if [ -d "$DOTFILES_DIR/configs/$dir" ]; then
             cp -r "$DOTFILES_DIR/configs/$dir" "$CONFIG_DIR/"
@@ -190,9 +210,11 @@ copy_configs() {
     done
 
     # ZSH configs
-    cp "$DOTFILES_DIR/configs/.zshrc" "$HOME/.zshrc"
-    cp "$DOTFILES_DIR/configs/.p10k.zsh" "$HOME/.p10k.zsh"
-    log_success "ZSH configs copiados"
+    cp "$DOTFILES_DIR/configs/.zshrc" "$HOME/.zshrc" 2>/dev/null \
+        || log_warn ".zshrc no encontrado en configs/, saltando..."
+    cp "$DOTFILES_DIR/configs/.p10k.zsh" "$HOME/.p10k.zsh" 2>/dev/null \
+        || log_warn ".p10k.zsh no encontrado en configs/, saltando..."
+    log_success "Configs copiados"
 }
 
 copy_wallpapers() {
@@ -205,8 +227,16 @@ copy_wallpapers() {
 setup_sddm() {
     log_section "Configurando SDDM"
     sudo mkdir -p /usr/share/sddm/themes/sugar-candy/backgrounds
-    sudo cp "$HOME/Pictures/wallpapers/wallhaven-ogg3zp_2560x1440.png" \
-        /usr/share/sddm/themes/sugar-candy/backgrounds/
+
+    # Usar el primer wallpaper disponible en vez de hardcodear el nombre
+    SDDM_WALL="$(ls "$HOME/Pictures/wallpapers/"*.png 2>/dev/null | head -1)"
+    if [ -z "$SDDM_WALL" ]; then
+        log_warn "No se encontró ningún wallpaper .png — SDDM sin fondo"
+    else
+        sudo cp "$SDDM_WALL" /usr/share/sddm/themes/sugar-candy/backgrounds/
+        log_info "Wallpaper SDDM: $(basename "$SDDM_WALL")"
+    fi
+
     sudo bash -c 'cat > /etc/sddm.conf << EOF
 [Theme]
 Current=sugar-candy
@@ -224,14 +254,16 @@ setup_services() {
 
 setup_zsh() {
     log_section "Configurando ZSH como shell default"
-    chsh -s $(which zsh)
+    chsh -s "$(which zsh)"
     log_success "ZSH configurado como shell default"
 }
 
 setup_pacman() {
     log_section "Configurando pacman"
     sudo sed -i 's/#Color/Color/' /etc/pacman.conf
-    sudo sed -i '/^Color/a ILoveCandy' /etc/pacman.conf
+    # Evitar duplicar ILoveCandy si ya existe
+    grep -q "ILoveCandy" /etc/pacman.conf \
+        || sudo sed -i '/^Color/a ILoveCandy' /etc/pacman.conf
     log_success "Pacman configurado con ILoveCandy"
 }
 
@@ -289,3 +321,4 @@ EOF
 echo -e "${NC}"
 log_success "¡Instalación completada! Reinicia para aplicar todos los cambios."
 log_warn "Ejecuta 'spicetify backup apply' después de abrir Spotify por primera vez."
+log_warn "AGS se inicia automáticamente via hyprland.conf — no necesitas correrlo manualmente."
