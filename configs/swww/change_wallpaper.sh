@@ -7,7 +7,7 @@ TRANSITION_FPS="60"
 
 # Función para cambiar wallpaper
 set_wallpaper() {
-    swww img "$1" \
+    awww img "$1" \
         --transition-type "$TRANSITION_TYPE" \
         --transition-pos "$TRANSITION_POS" \
         --transition-duration "$TRANSITION_DURATION" \
