@@ -39,7 +39,7 @@ PACMAN_PKGS=(
     # Window Manager
     # waybar  # legacy — reemplazado por AGS
     hyprland hyprlock hypridle dunst rofi
-    wlogout grim slurp wl-clipboard hyprpicker satty
+    grim slurp wl-clipboard hyprpicker satty
     cliphist wl-clip-persist hyprsunset
 
     # AGS / GJS
@@ -86,7 +86,7 @@ AUR_PKGS=(
 # ============================================
 install_pacman() {
     log_section "Instalando paquetes de pacman"
-    sudo pacman -S --needed --noconfirm "${PACMAN_PKGS[@]}"
+    sudo pacman -S --needed --noconfirm --ask=4 "${PACMAN_PKGS[@]}"
     log_success "Paquetes de pacman instalados"
 }
 
