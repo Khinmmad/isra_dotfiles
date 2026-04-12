@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+export LANG=C
 ## Author : Aditya Shakya (adi1090x)
 ## Github : @adi1090x
 #
