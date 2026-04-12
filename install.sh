@@ -128,7 +128,9 @@ install_powerlevel10k() {
 install_ronema() {
     log_section "Instalando ronema (rofi-network-manager)"
     if ! command -v ronema &>/dev/null; then
-        git clone https://github.com/P3rf/rofi-network-manager /tmp/ronema
+        rm -rf /tmp/ronema
+    rm -rf /tmp/ronema
+    git clone https://github.com/P3rf/rofi-network-manager /tmp/ronema
         cd /tmp/ronema && sudo bash rofi-network-manager install
         # Fix para sistemas en español
         sudo sed -i '2a export LANG=C' /usr/local/bin/ronema
@@ -146,7 +148,10 @@ install_spicetify_marketplace() {
         log_warn "Instala Spotify manualmente y ejecuta este paso después"
         return 0
     fi
+    sudo chmod a+wr /opt/spotify
+    sudo chmod a+wr /opt/spotify/Apps -R
     curl -fsSL https://raw.githubusercontent.com/spicetify/marketplace/main/resources/install.sh | sh
+    spicetify backup apply
     log_success "Spicetify Marketplace instalado"
 }
 
@@ -214,6 +219,7 @@ copy_configs() {
         || log_warn ".zshrc no encontrado en configs/, saltando..."
     cp "$DOTFILES_DIR/configs/.p10k.zsh" "$HOME/.p10k.zsh" 2>/dev/null \
         || log_warn ".p10k.zsh no encontrado en configs/, saltando..."
+    echo "shell /bin/zsh" >> "$CONFIG_DIR/kitty/kitty.conf"
     log_success "Configs copiados"
 }
 
