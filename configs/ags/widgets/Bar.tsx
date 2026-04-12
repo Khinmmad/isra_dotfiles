@@ -142,8 +142,8 @@ function Temperature() {
 // ─── Volume ───────────────────────────────────────────────────────────────
 function Volume() {
   const vol = poll(1000, () => {
-    const out = exec(`bash -c "pactl get-sink-volume @DEFAULT_SINK@ | grep -oP '\\d+(?=%)' | head -1"`)
-    const muted = exec(`bash -c "pactl get-sink-mute @DEFAULT_SINK@ | grep -c yes"`) === "1"
+    const out = exec(`bash -c "wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print int($2*100)}'"`)
+    const muted = exec(`bash -c "wpctl get-volume @DEFAULT_AUDIO_SINK@ | grep -c MUTED"`) === "1"
     const pct = parseInt(out) || 0
     const icon = muted ? "󰝟" : pct > 50 ? "󰕾" : "󰖀"
     return `${icon} ${pct}%`
@@ -158,8 +158,8 @@ function Volume() {
   const scroll = new Gtk.EventControllerScroll()
   scroll.flags = Gtk.EventControllerScrollFlags.VERTICAL
   scroll.connect("scroll", (_: any, _dx: number, dy: number) => {
-    if (dy < 0) GLib.spawn_command_line_async("pactl set-sink-volume @DEFAULT_SINK@ +5%")
-    else GLib.spawn_command_line_async("pactl set-sink-volume @DEFAULT_SINK@ -5%")
+    if (dy < 0) GLib.spawn_command_line_async("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+")
+    else GLib.spawn_command_line_async("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-")
   })
   box.add_controller(scroll)
   box.append(lbl)
