@@ -79,6 +79,7 @@ AUR_PKGS=(
     tokyonight-gtk-theme-git
     aylurs-gtk-shell           # AGS v3
     astal-mpris                # MPRIS para AGS (MusicPlayer)
+    bibata-cursor-theme-bin    # Cursor theme
 )
 
 # ============================================
@@ -261,6 +262,10 @@ setup_services() {
 setup_zsh() {
     log_section "Configurando ZSH como shell default"
     chsh -s "$(which zsh)"
+    # Symlinks para plugins instalados via pacman
+    mkdir -p "$HOME/.oh-my-zsh/custom/plugins"
+    ln -sf /usr/share/zsh/plugins/zsh-autosuggestions "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+    ln -sf /usr/share/zsh/plugins/zsh-syntax-highlighting "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
     log_success "ZSH configurado como shell default"
 }
 
