@@ -72,7 +72,7 @@ PACMAN_PKGS=(
 )
 
 AUR_PKGS=(
-    awww                      # wallpaper daemon (antes swww)
+    awww                      # wallpaper daemon (antes awww)
     eww
     spicetify-bin
     sddm-sugar-candy-git
@@ -195,7 +195,7 @@ backup_configs() {
     log_section "Haciendo backup de configs existentes"
     BACKUP_DIR="$HOME/.config-backup-$(date +%Y%m%d_%H%M%S)"
     mkdir -p "$BACKUP_DIR"
-    for dir in waybar hypr kitty ronema fastfetch eww swww dunst wofi rofi spicetify yazi nwg-look gtk-3.0 gtk-4.0 ags; do
+    for dir in waybar hypr kitty ronema fastfetch eww awww dunst wofi rofi spicetify yazi nwg-look gtk-3.0 gtk-4.0 ags; do
         if [ -d "$CONFIG_DIR/$dir" ]; then
             cp -r "$CONFIG_DIR/$dir" "$BACKUP_DIR/"
             log_warn "Backup de $dir en $BACKUP_DIR"
@@ -207,7 +207,7 @@ backup_configs() {
 copy_configs() {
     log_section "Copiando configs"
     # waybar se copia como referencia legacy pero AGS es la barra activa
-    for dir in waybar hypr kitty ronema fastfetch eww swww dunst wofi rofi spicetify yazi nwg-look gtk-3.0 gtk-4.0 ags; do
+    for dir in waybar hypr kitty ronema fastfetch eww awww dunst wofi rofi spicetify yazi nwg-look gtk-3.0 gtk-4.0 ags; do
         if [ -d "$DOTFILES_DIR/configs/$dir" ]; then
             cp -r "$DOTFILES_DIR/configs/$dir" "$CONFIG_DIR/"
             log_success "Copiado: $dir"
