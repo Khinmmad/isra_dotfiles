@@ -73,8 +73,8 @@ PACMAN_PKGS=(
 
 AUR_PKGS=(
     awww                      # wallpaper daemon (antes swww)
-    eww-wayland
-    spicetify-cli
+    eww
+    spicetify-bin
     sddm-sugar-candy-git
     tokyonight-gtk-theme-git
     aylurs-gtk-shell           # AGS v3
@@ -100,7 +100,7 @@ install_aur() {
         cd /tmp/paru && makepkg -si --noconfirm
         cd -
     fi
-    paru -S --needed --noconfirm "${AUR_PKGS[@]}"
+    paru -S --needed --noconfirm --skipreview "${AUR_PKGS[@]}"
     log_success "Paquetes AUR instalados"
 }
 
@@ -128,7 +128,7 @@ install_powerlevel10k() {
 install_ronema() {
     log_section "Instalando ronema (rofi-network-manager)"
     if ! command -v ronema &>/dev/null; then
-        git clone https://github.com/P3rf3ctRoot/rofi-network-manager /tmp/ronema
+        git clone https://github.com/P3rf/rofi-network-manager /tmp/ronema
         cd /tmp/ronema && sudo bash rofi-network-manager install
         # Fix para sistemas en español
         sudo sed -i '2a export LANG=C' /usr/local/bin/ronema
