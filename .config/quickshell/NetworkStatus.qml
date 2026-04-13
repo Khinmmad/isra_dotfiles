@@ -39,7 +39,7 @@ Item {
     }
     Timer {
         id: netPopupHideTimer
-        interval: 350
+        interval: 600
         onTriggered: {
             if (!netRoot.anyHovered) {
                 netRoot.popupVisible = false
@@ -122,7 +122,7 @@ Item {
         Rectangle {
             Layout.alignment: Qt.AlignVCenter
             height: 32; width: netLabel.implicitWidth + 40
-            radius: 12
+            radius: 16
             color: netHover.containsMouse ? "#45475a" : "#313244"
             Behavior on color { ColorAnimation { duration: 150 } }
 
@@ -169,7 +169,7 @@ Item {
             id: netPopupBg
             anchors.fill: parent
             color: "#1e1e2e"
-            radius: 16
+            radius: 24
             border.color: "#45475a"
             border.width: 1
 

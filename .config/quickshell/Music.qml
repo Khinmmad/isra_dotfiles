@@ -42,7 +42,7 @@ Item {
     }
     Timer {
         id: popupHideTimer
-        interval: 350
+        interval: 600
         onTriggered: {
             // Doble-check: solo cerrar si realmente ya no estamos hovering
             if (!musicRoot.anyHovered) {
@@ -85,7 +85,7 @@ Item {
 
         // Controles compactos
         Rectangle {
-            width: 20; height: 20; radius: 10
+            width: 20; height: 20; radius: 12
             color: prevArea.containsMouse ? "#45475a" : "transparent"
             Behavior on color { ColorAnimation { duration: 120 } }
             Layout.alignment: Qt.AlignVCenter
@@ -97,7 +97,7 @@ Item {
             }
         }
         Rectangle {
-            width: 20; height: 20; radius: 10
+            width: 20; height: 20; radius: 12
             color: playArea.containsMouse ? "#45475a" : "transparent"
             Behavior on color { ColorAnimation { duration: 120 } }
             Layout.alignment: Qt.AlignVCenter
@@ -155,7 +155,7 @@ Item {
             id: popupBg
             anchors.fill: parent
             color: "#1e1e2e"
-            radius: 16
+            radius: 24
             border.color: "#45475a"
             border.width: 1
 
