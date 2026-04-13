@@ -53,6 +53,7 @@ PACMAN_PKGS=(
 
 AUR_PKGS=(
     quickshell-git             # Panel / Barra de status modular
+    grub2-theme-fallout-git    # Tema de Fallout para GRUB
     awww                       # Wallpaper daemon
     eww-wayland                # Widgets (opcional)
     spicetify-cli              # Personalización de Spotify
@@ -119,7 +120,7 @@ copy_configs() {
     # Iterar sobre las carpetas en configs/ del repo
     cd "$DOTFILES_DIR/configs"
     for dir in *; do
-        if [ -d "$dir" ]; then
+        if [ -d "$dir" ] && [ "$dir" != "grub" ]; then
             # Backup si ya existe en ~/.config
             if [ -d "$CONFIG_DIR/$dir" ]; then
                 cp -r "$CONFIG_DIR/$dir" "$BACKUP_DIR/"
@@ -135,6 +136,23 @@ copy_configs() {
     # ZSH files (fuera de .config)
     [ -f "$DOTFILES_DIR/configs/.zshrc" ] && cp "$DOTFILES_DIR/configs/.zshrc" "$HOME/.zshrc"
     [ -f "$DOTFILES_DIR/configs/.p10k.zsh" ] && cp "$DOTFILES_DIR/configs/.p10k.zsh" "$HOME/.p10k.zsh"
+}
+
+setup_grub() {
+    log_section "Configurando GRUB (Tema Fallout)"
+    
+    # Backup
+    [ -f /etc/default/grub ] && sudo cp /etc/default/grub /etc/default/grub.bak
+    
+    # Aplicar config personalizada si existe
+    if [ -f "$DOTFILES_DIR/configs/grub/default_grub" ]; then
+        sudo cp "$DOTFILES_DIR/configs/grub/default_grub" /etc/default/grub
+        log_success "Configuración de GRUB aplicada desde dotfiles"
+    fi
+    
+    # Regenerar config
+    log_info "Regenerando menú de arranque..."
+    sudo grub-mkconfig -o /boot/grub/grub.cfg
 }
 
 copy_wallpapers() {
@@ -197,6 +215,7 @@ install_pacman
 install_aur
 install_ohmyzsh
 copy_configs
+setup_grub
 copy_wallpapers
 setup_sddm
 setup_services
