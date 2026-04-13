@@ -77,8 +77,7 @@ AUR_PKGS=(
     spicetify-bin
     sddm-sugar-candy-git
     tokyonight-gtk-theme-git
-    aylurs-gtk-shell           # AGS v3
-    astal-mpris                # MPRIS para AGS (MusicPlayer)
+    quickshell-git             # Barra de status
     bibata-cursor-theme-bin    # Cursor theme
 )
 
@@ -180,23 +179,12 @@ install_rofi_nerd_themes() {
     fi
 }
 
-install_ags() {
-    log_section "Configurando AGS"
-    # Guard: asegurarse de que copy_configs ya corrió
-    if [ ! -d "$CONFIG_DIR/ags" ]; then
-        log_error "~/.config/ags no existe — copy_configs falló o no se ejecutó"
-        return 1
-    fi
-    cd "$CONFIG_DIR/ags"
-    npm install
-    log_success "AGS configurado"
-}
 
 backup_configs() {
     log_section "Haciendo backup de configs existentes"
     BACKUP_DIR="$HOME/.config-backup-$(date +%Y%m%d_%H%M%S)"
     mkdir -p "$BACKUP_DIR"
-    for dir in waybar hypr kitty ronema fastfetch eww awww dunst wofi rofi spicetify yazi nwg-look gtk-3.0 gtk-4.0 ags; do
+    for dir in waybar hypr kitty ronema fastfetch eww awww dunst wofi rofi spicetify yazi nwg-look gtk-3.0 gtk-4.0 quickshell; do
         if [ -d "$CONFIG_DIR/$dir" ]; then
             cp -r "$CONFIG_DIR/$dir" "$BACKUP_DIR/"
             log_warn "Backup de $dir en $BACKUP_DIR"
@@ -208,7 +196,7 @@ backup_configs() {
 copy_configs() {
     log_section "Copiando configs"
     # waybar se copia como referencia legacy pero AGS es la barra activa
-    for dir in waybar hypr kitty ronema fastfetch eww awww dunst wofi rofi spicetify yazi nwg-look gtk-3.0 gtk-4.0 ags; do
+    for dir in waybar hypr kitty ronema fastfetch eww awww dunst wofi rofi spicetify yazi nwg-look gtk-3.0 gtk-4.0 quickshell; do
         if [ -d "$DOTFILES_DIR/configs/$dir" ]; then
             cp -r "$DOTFILES_DIR/configs/$dir" "$CONFIG_DIR/"
             log_success "Copiado: $dir"
@@ -318,7 +306,6 @@ setup_sddm
 setup_services
 setup_zsh
 install_spicetify_marketplace
-install_ags
 
 echo -e "\n${GREEN}"
 cat << 'EOF'
