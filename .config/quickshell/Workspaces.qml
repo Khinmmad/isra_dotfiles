@@ -37,7 +37,7 @@ RowLayout {
             Layout.alignment: Qt.AlignVCenter
             width: isFocused ? 28 : (hasWindows ? 16 : 10)
             height: 10
-            radius: 5
+            radius: 10
             color: isFocused ? "#cba6f7" : (hasWindows ? "#b4befe" : "#45475a")
             opacity: isFocused ? 1.0 : (hasWindows ? 0.85 : 0.45)
 

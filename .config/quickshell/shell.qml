@@ -13,22 +13,22 @@ ShellRoot {
             right: true
         }
         
-        // En Quickshell los márgenes de la ventana (para el protocolo LayerShell) suelen declararse así:
+        // Pegada arriba pero con margen lateral para lucir el redondeado
         margins {
-            top: 12
-            left: 12
-            right: 12
+            top: 0
+            left: 15
+            right: 15
         }
         
-        implicitHeight: 48 // Un poco más alto para verse más premium
-        color: "transparent" // La ventana real es transparente, la caja de color va adentro
+        implicitHeight: 56 
+        color: "transparent"
         
         Rectangle {
             id: panelRect
             anchors.fill: parent
-            color: "#1e1e2e" // Catppuccin Mocha Base (sólido)
-            radius: 16
-            border.color: "#45475a" // Catppuccin Surface 1
+            color: "#1e1e2e"
+            radius: 24 // Redondeado mucho más suave
+            border.color: "#45475a"
             border.width: 1
             
             // Animación de entrada al cargar el panel
@@ -45,7 +45,7 @@ ShellRoot {
             RowLayout {
                 anchors.fill: parent
                 anchors.margins: 8
-                spacing: 15
+                spacing: 25
                 
                 // Módulo izquierdo (ej. logo o menú)
                 Rectangle {
@@ -83,9 +83,10 @@ ShellRoot {
                     Layout.alignment: Qt.AlignVCenter
                 }
 
-                Clock {
+                BarClock {
                     Layout.alignment: Qt.AlignVCenter
                 }
+                // Clock estaba aquí, movido a la izquierda para testear
             }
         }
     }
