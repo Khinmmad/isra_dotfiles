@@ -37,12 +37,12 @@ PACMAN_PKGS=(
     sddm qt5-quickcontrols qt5-quickcontrols2 qt5-graphicaleffects
 
     # Window Manager
-    # waybar  # legacy — reemplazado por AGS
+    # waybar  # legacy — reemplazado por Quickshell
     hyprland hyprlock hypridle dunst rofi
     grim slurp wl-clipboard hyprpicker satty
     cliphist wl-clip-persist hyprsunset
 
-    # AGS / GJS
+    # Quickshell (Modular Bar)
     gjs npm
 
     # Dependencias
@@ -195,7 +195,7 @@ backup_configs() {
 
 copy_configs() {
     log_section "Copiando configs"
-    # waybar se copia como referencia legacy pero AGS es la barra activa
+    # waybar se copia como referencia legacy pero Quickshell es la barra activa
     for dir in waybar hypr kitty ronema fastfetch eww awww dunst wofi rofi spicetify yazi nwg-look gtk-3.0 gtk-4.0 quickshell; do
         if [ -d "$DOTFILES_DIR/configs/$dir" ]; then
             cp -r "$DOTFILES_DIR/configs/$dir" "$CONFIG_DIR/"
@@ -319,4 +319,4 @@ EOF
 echo -e "${NC}"
 log_success "¡Instalación completada! Reinicia para aplicar todos los cambios."
 log_warn "Ejecuta 'spicetify backup apply' después de abrir Spotify por primera vez."
-log_warn "AGS se inicia automáticamente via hyprland.conf — no necesitas correrlo manualmente."
+log_warn "Quickshell se inicia automáticamente via hyprland.conf — no necesitas correrlo manualmente."
