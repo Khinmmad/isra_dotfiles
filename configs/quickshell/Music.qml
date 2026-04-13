@@ -10,9 +10,9 @@ Item {
     implicitHeight: musicRow.implicitHeight
 
     // ── LÓGICA DE TIEMPO REAL ──
-    property double localPosition: 0 
+    property double localPosition: 0
     property bool isDraggingProgress: false
-    
+
     Timer {
         id: smoothTimer
         interval: 500
@@ -27,7 +27,7 @@ Item {
     }
 
     Connections {
-        target: player
+        target: player ?? null
         function onPositionChanged() {
             if (!isDraggingProgress) musicRoot.localPosition = player.position;
         }
@@ -56,18 +56,8 @@ Item {
 
     Process { id: spotifyLaunch; command: ["spotify"] }
 
-    property bool barHovered: musicHover.containsMouse
-    property bool popupHovered: false
-    property bool anyHovered: barHovered || popupHovered
+    // Visibilidad del popup — controlado por click
     property bool popupVisible: false
-
-    onAnyHoveredChanged: {
-        if (anyHovered) { popupHideTimer.stop(); popupShowTimer.start() } 
-        else { popupShowTimer.stop(); popupHideTimer.start() }
-    }
-
-    Timer { id: popupShowTimer; interval: 200; onTriggered: musicRoot.popupVisible = true }
-    Timer { id: popupHideTimer; interval: 600; onTriggered: { if (!musicRoot.anyHovered) musicRoot.popupVisible = false } }
 
     RowLayout {
         id: musicRow; spacing: 6
@@ -84,10 +74,10 @@ Item {
             Row {
                 spacing: 2
                 MusicIconBtn { text: "⏮"; onClicked: player?.previous() }
-                MusicIconBtn { 
+                MusicIconBtn {
                     text: player?.playbackState === MprisPlaybackState.Playing ? "⏸" : "▶"
                     iconColor: musicRoot.isSpotify ? "#1db954" : "#cdd6f4"
-                    onClicked: player?.togglePlaying() 
+                    onClicked: player?.togglePlaying()
                 }
                 MusicIconBtn { text: "⏭"; onClicked: player?.next() }
             }
@@ -108,7 +98,18 @@ Item {
         }
     }
 
-    MouseArea { id: musicHover; anchors.fill: musicRow; hoverEnabled: true; acceptedButtons: Qt.NoButton; propagateComposedEvents: true }
+    MouseArea {
+        id: musicHover
+        anchors.fill: musicRow
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        propagateComposedEvents: true
+        onClicked: (mouse) => {
+            // No abrir si se hizo click en los botones de control internos
+            mouse.accepted = false;
+            if (player) musicRoot.popupVisible = !musicRoot.popupVisible;
+        }
+    }
 
     component MusicIconBtn: Rectangle {
         property string text: ""
@@ -130,11 +131,9 @@ Item {
             id: popupBg; anchors.fill: parent; color: "#1e1e2e"; radius: 24; border.color: "#45475a"
             opacity: musicRoot.popupVisible ? 1.0 : 0.0
             scale: musicRoot.popupVisible ? 1.0 : 0.95
-            
+
             Behavior on opacity { NumberAnimation { duration: 200 } }
             Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
-
-            MouseArea { anchors.fill: parent; hoverEnabled: true; onContainsMouseChanged: musicRoot.popupHovered = containsMouse }
 
             ColumnLayout {
                 anchors.fill: parent; anchors.margins: 20; spacing: 12
@@ -144,6 +143,14 @@ Item {
                     Text { text: musicRoot.isSpotify ? "🎵 Spotify" : ("♫ " + (player?.identity ?? "Media")); color: musicRoot.isSpotify ? "#1db954" : "#a6e3a1"; font.pixelSize: 14; font.bold: true }
                     Item { Layout.fillWidth: true }
                     Text { text: player?.playbackState === MprisPlaybackState.Playing ? "Reproduciendo" : "Pausado"; color: "#6c7086"; font.pixelSize: 10; font.bold: true }
+                    // Botón de cerrar
+                    Rectangle {
+                        width: 22; height: 22; radius: 11
+                        color: closeBtn.containsMouse ? "#f38ba8" : "#313244"
+                        Behavior on color { ColorAnimation { duration: 120 } }
+                        Text { anchors.centerIn: parent; text: "✕"; font.pixelSize: 10; color: "#cdd6f4" }
+                        MouseArea { id: closeBtn; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: musicRoot.popupVisible = false }
+                    }
                 }
 
                 Rectangle { Layout.fillWidth: true; height: 1; color: "#313244" }
@@ -176,7 +183,7 @@ Item {
                         }
                         MouseArea {
                             anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                            
+
                             function updatePos(mouseX) {
                                 if (player && player.length > 0) {
                                     let ratio = Math.max(0, Math.min(1, mouseX / width));

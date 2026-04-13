@@ -13,39 +13,8 @@ Item {
     property string connectionStatus: "Escaneando..."
     property bool isConnected: currentSSID !== ""
 
-    // Control de visibilidad robusto del popup
-    property bool barHovered: netHover.containsMouse
-    property bool popupHovered: false  // Lo controla el MouseArea del popup
-    property bool anyHovered: barHovered || popupHovered
+    // Visibilidad del popup — controlado por click
     property bool popupVisible: false
-
-    onAnyHoveredChanged: {
-        if (anyHovered) {
-            netPopupHideTimer.stop()
-            netPopupShowTimer.start()
-        } else {
-            netPopupShowTimer.stop()
-            netPopupHideTimer.start()
-        }
-    }
-
-    Timer {
-        id: netPopupShowTimer
-        interval: 200
-        onTriggered: {
-            netRoot.popupVisible = true
-            scanProc.running = true
-        }
-    }
-    Timer {
-        id: netPopupHideTimer
-        interval: 600
-        onTriggered: {
-            if (!netRoot.anyHovered) {
-                netRoot.popupVisible = false
-            }
-        }
-    }
 
     // ── Modelo de redes WiFi ──
     property var wifiNetworks: []
@@ -99,7 +68,7 @@ Item {
     Process {
         id: connectProc
         command: ["bash", "-c", "echo placeholder"]
-        stdout: StdioCollector { id: connectOut }
+        stdout: StdioCollector {}
         onExited: {
             netRoot.connectingSSID = "";
             currentProc.running = true; // Refrescar estado
@@ -150,7 +119,12 @@ Item {
         anchors.fill: netRow
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        acceptedButtons: Qt.NoButton
+        onClicked: {
+            netRoot.popupVisible = !netRoot.popupVisible;
+            if (netRoot.popupVisible) {
+                scanProc.running = true;
+            }
+        }
     }
 
     // ── Popup de redes WiFi ──
@@ -177,16 +151,6 @@ Item {
             scale: netRoot.popupVisible ? 1.0 : 0.95
             Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.OutSine } }
             Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
-
-            MouseArea {
-                id: netPopupMouseArea
-                anchors.fill: parent
-                hoverEnabled: true
-                acceptedButtons: Qt.NoButton
-                onContainsMouseChanged: {
-                    netRoot.popupHovered = containsMouse
-                }
-            }
 
             ColumnLayout {
                 anchors.fill: parent
@@ -225,6 +189,18 @@ Item {
                                 spinAnim.running = true;
                                 scanProc.running = true;
                             }
+                        }
+                    }
+                    // Botón de cerrar
+                    Rectangle {
+                        width: 28; height: 28; radius: 14
+                        color: closeArea.containsMouse ? "#f38ba8" : "#313244"
+                        Behavior on color { ColorAnimation { duration: 120 } }
+                        Text { anchors.centerIn: parent; text: "✕"; font.pixelSize: 11; color: "#cdd6f4" }
+                        MouseArea {
+                            id: closeArea; anchors.fill: parent; hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: netRoot.popupVisible = false
                         }
                     }
                 }
@@ -352,7 +328,7 @@ Item {
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
-                                        if (!isCurrentNet) {
+                                        if (!isCurrentNet && !isConnecting) {
                                             netRoot.connectingSSID = net.ssid;
                                             connectProc.command = ["bash", "-c",
                                                 "nmcli device wifi connect " + JSON.stringify(net.ssid)];
