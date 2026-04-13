@@ -81,7 +81,7 @@ Item {
             MusicIconBtn { text: "⏮"; onClicked: player?.previous() }
             MusicIconBtn { 
                 text: player?.playbackState === MprisPlaybackState.Playing ? "⏸" : "▶"
-                color: musicRoot.isSpotify ? "#1db954" : "#cdd6f4"
+                iconColor: musicRoot.isSpotify ? "#1db954" : "#cdd6f4"
                 onClicked: player?.togglePlaying() 
             }
             MusicIconBtn { text: "⏭"; onClicked: player?.next() }
@@ -96,12 +96,12 @@ Item {
     // Componente interno para botones de la barra
     component MusicIconBtn: Rectangle {
         property string text: ""
-        property string color: "#cdd6f4"
+        property string iconColor: "#cdd6f4"
         signal clicked()
         width: 20; height: 20; radius: 10
         color: mArea.containsMouse ? "#45475a" : "transparent"
         Behavior on color { ColorAnimation { duration: 120 } }
-        Text { anchors.centerIn: parent; text: parent.text; color: parent.color; font.pixelSize: 10 }
+        Text { anchors.centerIn: parent; text: parent.text; color: parent.iconColor; font.pixelSize: 10 }
         MouseArea { id: mArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: parent.clicked() }
     }
 
