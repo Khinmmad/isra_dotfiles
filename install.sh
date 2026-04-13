@@ -3,9 +3,8 @@
 # Dotfiles Install Script - isra@archlinux
 # ============================================
 
-set -e
-
-DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_DIR=$(dirname $(readlink -f $0))
 CONFIG_DIR="$HOME/.config"
 
 # Colores
@@ -23,300 +22,186 @@ log_error()   { echo -e "${RED}[ERROR]${NC} $1"; }
 log_section() { echo -e "\n${CYAN}========== $1 ==========${NC}"; }
 
 # ============================================
-# PAQUETES
+# PAQUETES (Sistema Arch Linux)
 # ============================================
 PACMAN_PKGS=(
-    # Sistema
+    # Sistema Base & Utilities
     uwsm pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse
     gst-plugin-pipewire wireplumber pavucontrol pamixer libpulse
-    networkmanager network-manager-applet
-    bluez bluez-utils blueman
-    brightnessctl playerctl udiskie
+    networkmanager network-manager-applet bluez bluez-utils blueman
+    brightnessctl playerctl udiskie parallel jq imagemagick
+    xdg-user-dirs xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
+    pacman-contrib qt5-imageformats ffmpegthumbs libnotify
 
-    # Display Manager
-    sddm qt5-quickcontrols qt5-quickcontrols2 qt5-graphicaleffects
-
-    # Window Manager
-    # waybar  # legacy — reemplazado por Quickshell
-    hyprland hyprlock hypridle dunst rofi
+    # Window Manager & Display
+    sddm hyprland hyprlock hypridle dunst rofi
     grim slurp wl-clipboard hyprpicker satty
     cliphist wl-clip-persist hyprsunset
 
-    # Quickshell (Modular Bar)
-    gjs npm
-
-    # Dependencias
-    polkit-gnome xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
-    xdg-user-dirs pacman-contrib parallel jq imagemagick
-    qt5-imageformats ffmpegthumbs libnotify noto-fonts-emoji
-
-    # Fuentes
-    ttf-jetbrains-mono-nerd
-
-    # Theming
+    # Theming & Fonts
     nwg-look qt5ct qt6ct kvantum kvantum-qt5 qt5-wayland qt6-wayland
+    noto-fonts-emoji ttf-jetbrains-mono-nerd
 
-    # Aplicaciones
+    # Aplicaciones & Shell
     firefox kitty thunar thunar-archive-plugin thunar-media-tags-plugin
-    tumbler ffmpegthumbnailer ark unzip vim wofi
-    nwg-displays fzf
+    tumbler ffmpegthumbnailer ark unzip vim wofi nwg-displays fzf
+    zsh zsh-syntax-highlighting zsh-autosuggestions fastfetch lsd npm
 
-    # Shell
-    zsh zsh-syntax-highlighting zsh-autosuggestions fastfetch lsd
-
-    # Audio/Utils
-    alsa-utils
-
-    # Yazi
+    # Yazi (Terminal File Manager)
     yazi ffmpeg p7zip poppler fd ripgrep zoxide
 )
 
 AUR_PKGS=(
-    awww                      # wallpaper daemon (antes awww)
-    eww
-    spicetify-bin
-    sddm-sugar-candy-git
-    tokyonight-gtk-theme-git
-    quickshell-git             # Barra de status
-    bibata-cursor-theme-bin    # Cursor theme
+    quickshell-git             # Panel / Barra de status modular
+    awww                       # Wallpaper daemon
+    eww-wayland                # Widgets (opcional)
+    spicetify-cli              # Personalización de Spotify
+    sddm-sugar-candy-git       # Tema de SDDM
+    tokyonight-gtk-theme-git   # Tema GTK
+    bibata-cursor-theme-bin    # Set de cursores
 )
 
 # ============================================
-# FUNCIONES
+# FUNCIONES DE INSTALACIÓN
 # ============================================
+
+setup_pacman() {
+    log_section "Configurando pacman"
+    sudo sed -i 's/#Color/Color/' /etc/pacman.conf 2>/dev/null
+    if ! grep -q "ILoveCandy" /etc/pacman.conf; then
+        sudo sed -i '/^Color/a ILoveCandy' /etc/pacman.conf 2>/dev/null
+    fi
+    log_success "Pacman configurado"
+}
+
 install_pacman() {
     log_section "Instalando paquetes de pacman"
-    sudo pacman -S --needed --noconfirm --ask=4 "${PACMAN_PKGS[@]}"
-    log_success "Paquetes de pacman instalados"
+    if ! sudo pacman -S --needed --noconfirm "${PACMAN_PKGS[@]}"; then
+        log_error "Error al instalar paquetes de pacman. Verifica tu conexión o repositorios."
+        return 1
+    fi
 }
 
 install_aur() {
-    log_section "Instalando paquetes de AUR"
-    # Instalar paru si no existe
+    log_section "Instalando de AUR (usando paru)"
     if ! command -v paru &>/dev/null; then
-        log_info "Instalando paru..."
-        sudo pacman -S --needed base-devel
+        log_info "Paru no encontrado. Instalándolo..."
+        sudo pacman -S --needed base-devel git --noconfirm
         git clone https://aur.archlinux.org/paru.git /tmp/paru
         cd /tmp/paru && makepkg -si --noconfirm
         cd -
     fi
-    paru -S --needed --noconfirm --skipreview "${AUR_PKGS[@]}"
-    log_success "Paquetes AUR instalados"
+    if ! paru -S --needed --noconfirm "${AUR_PKGS[@]}"; then
+        log_error "Error al instalar paquetes de AUR."
+        return 1
+    fi
 }
 
 install_ohmyzsh() {
-    log_section "Instalando Oh My Zsh"
+    log_section "Personalizando Shell (ZSH)"
     if [ ! -d "$HOME/.oh-my-zsh" ]; then
         sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-        log_success "Oh My Zsh instalado"
-    else
-        log_warn "Oh My Zsh ya existe, saltando..."
     fi
-}
-
-install_powerlevel10k() {
-    log_section "Instalando Powerlevel10k"
+    # Powerlevel10k
     if [ ! -d "$HOME/.oh-my-zsh/custom/themes/powerlevel10k" ]; then
         git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \
             "$HOME/.oh-my-zsh/custom/themes/powerlevel10k"
-        log_success "Powerlevel10k instalado"
-    else
-        log_warn "Powerlevel10k ya existe, saltando..."
     fi
-}
-
-install_ronema() {
-    log_section "Instalando ronema (rofi-network-manager)"
-    if ! command -v ronema &>/dev/null; then
-        rm -rf /tmp/ronema
-    rm -rf /tmp/ronema
-    git clone https://github.com/P3rf/rofi-network-manager /tmp/ronema
-        cd /tmp/ronema && sudo bash rofi-network-manager install
-        # Fix para sistemas en español
-        sudo sed -i '2a export LANG=C' /usr/local/bin/ronema
-        cd -
-        log_success "Ronema instalado"
-    else
-        log_warn "Ronema ya existe, saltando..."
-    fi
-}
-
-install_spicetify_marketplace() {
-    log_section "Instalando Spicetify Marketplace"
-    if ! command -v spotify &>/dev/null; then
-        log_warn "Spotify no está instalado — saltando Spicetify Marketplace"
-        log_warn "Instala Spotify manualmente y ejecuta este paso después"
-        return 0
-    fi
-    sudo chmod a+wr /opt/spotify
-    sudo chmod a+wr /opt/spotify/Apps -R
-    curl -fsSL https://raw.githubusercontent.com/spicetify/marketplace/main/resources/install.sh | sh
-    spicetify backup apply
-    log_success "Spicetify Marketplace instalado"
-}
-
-install_rofi_themes() {
-    log_section "Instalando temas de rofi"
-    if [ ! -d "$HOME/.local/src/rofi-themes" ]; then
-        git clone https://github.com/adi1090x/rofi "$HOME/.local/src/rofi-themes"
-        log_success "Temas de rofi instalados"
-    else
-        log_warn "Temas de rofi ya existen, saltando..."
-    fi
-}
-
-install_rofi_nerd_themes() {
-    log_section "Instalando rofi-themes-collection"
-    if [ ! -d "$HOME/.local/src/rofi-themes-collection" ]; then
-        git clone https://github.com/lr-tech/rofi-themes-collection \
-            "$HOME/.local/src/rofi-themes-collection"
-        mkdir -p "$HOME/.local/share/rofi/themes"
-        cp "$HOME/.local/src/rofi-themes-collection/themes/"*.rasi \
-            "$HOME/.local/share/rofi/themes/"
-        log_success "rofi-themes-collection instalado"
-    else
-        log_warn "rofi-themes-collection ya existe, saltando..."
-    fi
-}
-
-
-backup_configs() {
-    log_section "Haciendo backup de configs existentes"
-    BACKUP_DIR="$HOME/.config-backup-$(date +%Y%m%d_%H%M%S)"
-    mkdir -p "$BACKUP_DIR"
-    for dir in waybar hypr kitty ronema fastfetch eww awww dunst wofi rofi spicetify yazi nwg-look gtk-3.0 gtk-4.0 quickshell; do
-        if [ -d "$CONFIG_DIR/$dir" ]; then
-            cp -r "$CONFIG_DIR/$dir" "$BACKUP_DIR/"
-            log_warn "Backup de $dir en $BACKUP_DIR"
-        fi
-    done
-    log_success "Backup completado en $BACKUP_DIR"
 }
 
 copy_configs() {
-    log_section "Copiando configs"
-    # waybar se copia como referencia legacy pero Quickshell es la barra activa
-    for dir in waybar hypr kitty ronema fastfetch eww awww dunst wofi rofi spicetify yazi nwg-look gtk-3.0 gtk-4.0 quickshell; do
-        if [ -d "$DOTFILES_DIR/configs/$dir" ]; then
-            cp -r "$DOTFILES_DIR/configs/$dir" "$CONFIG_DIR/"
-            log_success "Copiado: $dir"
+    log_section "Sincronizando configuraciones"
+    
+    # Backup
+    BACKUP_DIR="$HOME/.config-backup-$(date +%Y%m%d_%H%M%S)"
+    mkdir -p "$BACKUP_DIR"
+    
+    # Iterar sobre las carpetas en configs/ del repo
+    cd "$DOTFILES_DIR/configs"
+    for dir in *; do
+        if [ -d "$dir" ]; then
+            # Backup si ya existe en ~/.config
+            if [ -d "$CONFIG_DIR/$dir" ]; then
+                cp -r "$CONFIG_DIR/$dir" "$BACKUP_DIR/"
+            fi
+            # Copiar nueva versión
+            mkdir -p "$CONFIG_DIR"
+            cp -r "$dir" "$CONFIG_DIR/"
+            log_success "Config sincronizada: $dir"
         fi
     done
+    cd -
 
-    # ZSH configs
-    cp "$DOTFILES_DIR/configs/.zshrc" "$HOME/.zshrc" 2>/dev/null \
-        || log_warn ".zshrc no encontrado en configs/, saltando..."
-    cp "$DOTFILES_DIR/configs/.p10k.zsh" "$HOME/.p10k.zsh" 2>/dev/null \
-        || log_warn ".p10k.zsh no encontrado en configs/, saltando..."
-    echo "shell /bin/zsh" >> "$CONFIG_DIR/kitty/kitty.conf"
-    log_success "Configs copiados"
+    # ZSH files (fuera de .config)
+    [ -f "$DOTFILES_DIR/configs/.zshrc" ] && cp "$DOTFILES_DIR/configs/.zshrc" "$HOME/.zshrc"
+    [ -f "$DOTFILES_DIR/configs/.p10k.zsh" ] && cp "$DOTFILES_DIR/configs/.p10k.zsh" "$HOME/.p10k.zsh"
 }
 
 copy_wallpapers() {
-    log_section "Copiando wallpapers"
+    log_section "Sincronizando Wallpapers"
     mkdir -p "$HOME/Pictures/wallpapers"
-    cp "$DOTFILES_DIR/wallpapers/"* "$HOME/Pictures/wallpapers/"
-    log_success "Wallpapers copiados"
+    if [ -d "$DOTFILES_DIR/wallpapers" ]; then
+        cp "$DOTFILES_DIR/wallpapers/"* "$HOME/Pictures/wallpapers/"
+        log_success "Wallpapers copiados"
+    fi
 }
 
 setup_sddm() {
-    log_section "Configurando SDDM"
+    log_section "Configurando SDDM Pantalla de Inicio"
     sudo mkdir -p /usr/share/sddm/themes/sugar-candy/backgrounds
-
-    # Usar el primer wallpaper disponible en vez de hardcodear el nombre
     SDDM_WALL="$(ls "$HOME/Pictures/wallpapers/"*.png 2>/dev/null | head -1)"
-    if [ -z "$SDDM_WALL" ]; then
-        log_warn "No se encontró ningún wallpaper .png — SDDM sin fondo"
-    else
+    if [ -n "$SDDM_WALL" ]; then
         sudo cp "$SDDM_WALL" /usr/share/sddm/themes/sugar-candy/backgrounds/
-        log_info "Wallpaper SDDM: $(basename "$SDDM_WALL")"
     fi
-
     sudo bash -c 'cat > /etc/sddm.conf << EOF
 [Theme]
 Current=sugar-candy
 EOF'
-    log_success "SDDM configurado"
 }
 
 setup_services() {
-    log_section "Habilitando servicios"
+    log_section "Habilitando Servicios de Sistema"
     sudo systemctl enable sddm
     sudo systemctl enable NetworkManager
     sudo systemctl enable bluetooth
-    log_success "Servicios habilitados"
-}
-
-setup_zsh() {
-    log_section "Configurando ZSH como shell default"
-    chsh -s "$(which zsh)"
-    # Symlinks para plugins instalados via pacman
-    mkdir -p "$HOME/.oh-my-zsh/custom/plugins"
-    ln -sf /usr/share/zsh/plugins/zsh-autosuggestions "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
-    ln -sf /usr/share/zsh/plugins/zsh-syntax-highlighting "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
-    log_success "ZSH configurado como shell default"
-}
-
-setup_pacman() {
-    log_section "Configurando pacman"
-    sudo sed -i 's/#Color/Color/' /etc/pacman.conf
-    # Evitar duplicar ILoveCandy si ya existe
-    grep -q "ILoveCandy" /etc/pacman.conf \
-        || sudo sed -i '/^Color/a ILoveCandy' /etc/pacman.conf
-    log_success "Pacman configurado con ILoveCandy"
+    log_success "Servicios habilitados (SDDM, NetworkManager, Bluetooth)"
 }
 
 # ============================================
-# MAIN
+# LÓGICA PRINCIPAL (MAIN)
 # ============================================
+
 echo -e "${CYAN}"
 cat << 'EOF'
   ____        _    __ _ _           
- |  _ \  ___ | |_ / _(_) | ___  ___ 
- | | | |/ _ \| __| |_| | |/ _ \/ __|
- | |_| | (_) | |_|  _| | |  __/\__ \
- |____/ \___/ \__|_| |_|_|\___||___/
-                                      
-  isra@archlinux - Arch + Hyprland
+  |  _ \  ___ | |_ / _(_) | ___  ___ 
+  | | | |/ _ \| __| |_| | |/ _ \/ __|
+  | |_| | (_) | |_|  _| | |  __/\__ \
+  |____/ \___/ \__|_| |_|_|\___||___/
+                                       
+  isra@archlinux - Quickshell + Hyprland
 EOF
 echo -e "${NC}"
 
-echo -e "${YELLOW}Este script instalará todos los dotfiles y paquetes necesarios.${NC}"
-echo -e "${YELLOW}Se hará un backup de tus configs actuales antes de sobreescribir.${NC}"
-read -p "¿Continuar? [s/N] " -n 1 -r
+echo -e "${YELLOW}Este script instalará el setup completo de dotfiles.${NC}"
+read -p "¿Deseas continuar con la instalación? [s/N] " -n 1 -r
 echo
 if [[ ! $REPLY =~ ^[Ss]$ ]]; then
-    log_error "Instalación cancelada"
+    log_error "Instalación cancelada."
     exit 1
 fi
 
-# Ejecutar en orden
+# Flujo de ejecución
 setup_pacman
 install_pacman
 install_aur
 install_ohmyzsh
-install_powerlevel10k
-install_ronema
-install_rofi_themes
-install_rofi_nerd_themes
-backup_configs
 copy_configs
 copy_wallpapers
 setup_sddm
 setup_services
-setup_zsh
-install_spicetify_marketplace
 
-echo -e "\n${GREEN}"
-cat << 'EOF'
-  ___           _        _            _   _ 
- |_ _|_ __  ___| |_ __ _| | __ _  __| | | |
-  | || '_ \/ __| __/ _` | |/ _` |/ _` | | |
-  | || | | \__ \ || (_| | | (_| | (_| | |_|
- |___|_| |_|___/\__\__,_|_|\__,_|\__,_| (_)
-                                             
-EOF
-echo -e "${NC}"
-log_success "¡Instalación completada! Reinicia para aplicar todos los cambios."
-log_warn "Ejecuta 'spicetify backup apply' después de abrir Spotify por primera vez."
-log_warn "Quickshell se inicia automáticamente via hyprland.conf — no necesitas correrlo manualmente."
+log_section "TODO LISTO"
+log_success "Instalación completada con éxito."
+log_warn "Por favor, reinicia para entrar en tu nuevo entorno."
+log_info "La barra (Quickshell) se iniciará automáticamente al entrar en Hyprland."
