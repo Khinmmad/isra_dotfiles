@@ -8,20 +8,14 @@ Item {
     implicitWidth: sysRow.implicitWidth
     implicitHeight: sysRow.implicitHeight
 
-    // Lógica de hover sincronizada
     property bool barHovered: sysHover.containsMouse
     property bool popupHovered: false
     property bool anyHovered: barHovered || popupHovered
     property bool popupVisible: false
 
     onAnyHoveredChanged: {
-        if (anyHovered) {
-            hideTimer.stop()
-            showTimer.start()
-        } else {
-            showTimer.stop()
-            hideTimer.start()
-        }
+        if (anyHovered) { hideTimer.stop(); showTimer.start() }
+        else            { showTimer.stop(); hideTimer.start() }
     }
 
     Timer { id: showTimer; interval: 200; onTriggered: sysRoot.popupVisible = true }
@@ -29,129 +23,105 @@ Item {
 
     RowLayout {
         id: sysRow
-        spacing: 12
+        spacing: 10
 
-        // CPU Capsule
+        // CPU
         Rectangle {
             Layout.alignment: Qt.AlignVCenter
             height: 32; width: cpuText.implicitWidth + 20
-            radius: 16
-            color: "#313244" // Surface 0
-            border.color: "#45475a"
-            border.width: 1
-
+            radius: 16; color: "#2b2810"
+            border.color: "#514c1b"; border.width: 1
             Text {
                 id: cpuText
                 anchors.centerIn: parent
                 text: "⚙️ --%"
-                color: "#f38ba8" // Catppuccin Red
-                font.pixelSize: 13
-                font.bold: true
+                color: "#cc6e28"
+                font.pixelSize: 13; font.bold: true
             }
         }
 
-        // RAM Capsule
+        // RAM
         Rectangle {
             Layout.alignment: Qt.AlignVCenter
             height: 32; width: ramText.implicitWidth + 20
-            radius: 16
-            color: "#313244" // Surface 0
-            border.color: "#45475a"
-            border.width: 1
-
+            radius: 16; color: "#2b2810"
+            border.color: "#514c1b"; border.width: 1
             Text {
                 id: ramText
                 anchors.centerIn: parent
                 text: "🧠 --%"
-                color: "#a6e3a1" // Catppuccin Green
-                font.pixelSize: 13
-                font.bold: true
+                color: "#96c836"
+                font.pixelSize: 13; font.bold: true
             }
         }
     }
 
-    MouseArea {
-        id: sysHover
-        anchors.fill: sysRow
-        hoverEnabled: true
-    }
+    MouseArea { id: sysHover; anchors.fill: sysRow; hoverEnabled: true }
 
-    // ── Popup de Información del Sistema ──
     PopupWindow {
         id: sysPopup
         anchor.item: sysRoot
-        anchor.edges: Edges.Bottom
-        anchor.gravity: Edges.Bottom
+        anchor.edges: Edges.Bottom; anchor.gravity: Edges.Bottom
         anchor.adjustment: PopupAdjustment.Slide
-        implicitWidth: 200
-        implicitHeight: 120
+        implicitWidth: 200; implicitHeight: 130
         visible: sysRoot.popupVisible
         color: "transparent"
 
         Rectangle {
-            width: 200
-            height: 120
-            color: "#1e1e2e"
-            radius: 24
-            border.color: "#45475a"
-            border.width: 1
+            width: 200; height: 130
+            color: "#1d1b09"; radius: 20
+            border.color: "#514c1b"; border.width: 1
+
+            opacity: sysRoot.popupVisible ? 1.0 : 0.0
+            scale:   sysRoot.popupVisible ? 1.0 : 0.95
+            Behavior on opacity { NumberAnimation { duration: 200 } }
+            Behavior on scale   { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
 
             MouseArea {
-                anchors.fill: parent
-                hoverEnabled: true
+                anchors.fill: parent; hoverEnabled: true
                 onContainsMouseChanged: sysRoot.popupHovered = containsMouse
             }
 
             ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: 16
-                spacing: 12
+                anchors.fill: parent; anchors.margins: 16; spacing: 12
 
                 Text {
                     text: "Estado del Sistema"
-                    color: "#cdd6f4"
-                    font.pixelSize: 14
-                    font.bold: true
+                    color: "#fef3c7"; font.pixelSize: 14; font.bold: true
                     Layout.alignment: Qt.AlignHCenter
                 }
 
-                // CPU Detail
                 ColumnLayout {
                     spacing: 4
                     RowLayout {
-                        Text { text: "CPU"; color: "#f38ba8"; font.pixelSize: 11; font.bold: true }
+                        Text { text: "CPU";    color: "#cc6e28"; font.pixelSize: 11; font.bold: true }
                         Item { Layout.fillWidth: true }
-                        Text { text: cpuText.text.split(" ")[1]; color: "#bac2de"; font.pixelSize: 11 }
+                        Text { text: cpuText.text.split(" ")[1]; color: "#ddc880"; font.pixelSize: 11 }
                     }
                     Rectangle {
-                        Layout.fillWidth: true
-                        height: 6; radius: 3
-                        color: "#313244"
+                        Layout.fillWidth: true; height: 6; radius: 3; color: "#393616"
                         Rectangle {
                             height: parent.height; radius: 3
                             width: parent.width * (parseFloat(cpuText.text.split(" ")[1]) / 100)
-                            color: "#f38ba8"
+                            color: "#cc6e28"
                             Behavior on width { NumberAnimation { duration: 500 } }
                         }
                     }
                 }
 
-                // RAM Detail
                 ColumnLayout {
                     spacing: 4
                     RowLayout {
-                        Text { text: "Memoria"; color: "#a6e3a1"; font.pixelSize: 11; font.bold: true }
+                        Text { text: "Memoria"; color: "#96c836"; font.pixelSize: 11; font.bold: true }
                         Item { Layout.fillWidth: true }
-                        Text { text: ramText.text.split(" ")[1]; color: "#bac2de"; font.pixelSize: 11 }
+                        Text { text: ramText.text.split(" ")[1]; color: "#ddc880"; font.pixelSize: 11 }
                     }
                     Rectangle {
-                        Layout.fillWidth: true
-                        height: 6; radius: 3
-                        color: "#313244"
+                        Layout.fillWidth: true; height: 6; radius: 3; color: "#393616"
                         Rectangle {
                             height: parent.height; radius: 3
                             width: parent.width * (parseFloat(ramText.text.split(" ")[1]) / 100)
-                            color: "#a6e3a1"
+                            color: "#96c836"
                             Behavior on width { NumberAnimation { duration: 500 } }
                         }
                     }
@@ -160,7 +130,6 @@ Item {
         }
     }
 
-    // Datos (Procesos)
     Process {
         id: ramProc
         command: ["bash", "-c", "free -m | awk '/^Mem/ {printf \"%.0f\", $3/$2 * 100}'"]
@@ -176,13 +145,7 @@ Item {
     }
 
     Timer {
-        interval: 3000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: {
-            ramProc.running = true
-            cpuProc.running = true
-        }
+        interval: 3000; running: true; repeat: true; triggeredOnStart: true
+        onTriggered: { ramProc.running = true; cpuProc.running = true }
     }
 }
