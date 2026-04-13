@@ -111,8 +111,12 @@ Item {
     MouseArea { id: musicHover; anchors.fill: musicRow; hoverEnabled: true; acceptedButtons: Qt.NoButton; propagateComposedEvents: true }
 
     component MusicIconBtn: Rectangle {
-        property string text: ""; property string iconColor: "#cdd6f4"; signal clicked()
-        width: 20; height: 20; radius: 10
+        property string text: ""
+        property string iconColor: "#cdd6f4"
+        signal clicked()
+        width: 20
+        height: 20
+        radius: 10
         color: mArea.containsMouse ? "#45475a" : "transparent"
         Text { anchors.centerIn: parent; text: parent.text; color: parent.iconColor; font.pixelSize: 10 }
         MouseArea { id: mArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: parent.clicked() }
@@ -124,8 +128,11 @@ Item {
 
         Rectangle {
             id: popupBg; anchors.fill: parent; color: "#1e1e2e"; radius: 24; border.color: "#45475a"
-            opacity: musicRoot.popupVisible ? 1.0 : 0.0; scale: musicRoot.popupVisible ? 1.0 : 0.95
-            Behavior on opacity { NumberAnimation { duration: 200 } }; Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
+            opacity: musicRoot.popupVisible ? 1.0 : 0.0
+            scale: musicRoot.popupVisible ? 1.0 : 0.95
+            
+            Behavior on opacity { NumberAnimation { duration: 200 } }
+            Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
 
             MouseArea { anchors.fill: parent; hoverEnabled: true; onContainsMouseChanged: musicRoot.popupHovered = containsMouse }
 
@@ -230,7 +237,10 @@ Item {
     }
 
     component ControlBtn: Rectangle {
-        property string text: ""; property int size: 40; property bool accent: false; signal clicked()
+        property string text: ""
+        property int size: 40
+        property bool accent: false
+        signal clicked()
         width: size; height: size; radius: size/2
         color: btnM.containsMouse ? (accent ? (musicRoot.isSpotify ? "#1db954" : "#cba6f7") : "#45475a") : "#313244"
         scale: btnM.pressed ? 0.9 : (btnM.containsMouse ? 1.1 : 1.0)
