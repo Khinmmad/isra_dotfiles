@@ -88,7 +88,7 @@ Item {
                 Text {
                     id: netLabel
                     text: netRoot.isConnected ? netRoot.currentSSID : "WiFi"
-                    color: netRoot.isConnected ? "#96c836" : "#9e8438"
+                    color: netRoot.isConnected ? "#c8e882" : "#f0c830"
                     font.pixelSize: 12; font.bold: true; elide: Text.ElideRight
                 }
             }

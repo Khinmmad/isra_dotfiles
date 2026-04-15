@@ -47,7 +47,7 @@ Item {
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: Qt.formatDate(currentTime, "ddd d 'de' MMM")
-                color: "#9e8438"
+                color: "#f0c830"
                 font.pixelSize: 9
             }
         }

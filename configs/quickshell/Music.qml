@@ -59,7 +59,7 @@ Item {
         id: playingComponent
         RowLayout {
             spacing: 6
-            Text { text: musicRoot.isSpotify ? "🎵" : "♫"; color: musicRoot.isSpotify ? "#1db954" : "#96c836"; font.pixelSize: 15 }
+            Text { text: musicRoot.isSpotify ? "🎵" : "♫"; color: musicRoot.isSpotify ? "#1dd35f" : "#c8e882"; font.pixelSize: 15 }
             Text { text: player?.trackTitle ?? ""; color: "#fef3c7"; font.pixelSize: 12; font.bold: true; elide: Text.ElideRight; Layout.maximumWidth: 120 }
             Row {
                 spacing: 2
@@ -82,7 +82,7 @@ Item {
                 width: 130; height: 26; radius: 13
                 color: launchArea.containsMouse ? "#2b2810" : "transparent"
                 border.color: launchArea.containsMouse ? "#514c1b" : "transparent"
-                Text { anchors.centerIn: parent; text: "🎵 Iniciar Spotify"; color: launchArea.containsMouse ? "#1db954" : "#9e8438"; font.pixelSize: 11; font.bold: true }
+                Text { anchors.centerIn: parent; text: "🎵 Iniciar Spotify"; color: launchArea.containsMouse ? "#1dd35f" : "#f0c830"; font.pixelSize: 11; font.bold: true }
                 MouseArea { id: launchArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: spotifyLaunch.running = true }
             }
         }

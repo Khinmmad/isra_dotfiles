@@ -35,7 +35,7 @@ Item {
                 id: cpuText
                 anchors.centerIn: parent
                 text: "⚙️ --%"
-                color: "#cc6e28"
+                color: "#ff8c42"
                 font.pixelSize: 13; font.bold: true
             }
         }
@@ -50,7 +50,7 @@ Item {
                 id: ramText
                 anchors.centerIn: parent
                 text: "🧠 --%"
-                color: "#96c836"
+                color: "#c8e882"
                 font.pixelSize: 13; font.bold: true
             }
         }
