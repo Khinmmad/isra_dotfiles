@@ -3,13 +3,14 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
 
-RowLayout {
-    spacing: 6
+ColumnLayout {
+    spacing: 8
 
     Repeater {
         model: 10
 
-        Rectangle {
+        Item {
+            id: wsItem
             required property int index
             property int wsId: index + 1
 
@@ -30,23 +31,71 @@ RowLayout {
 
             readonly property bool hasWindows: wsObject !== null
 
-            // 3 estados: activo (amarillo), ocupado (oro), vacío (overlay)
-            Layout.alignment: Qt.AlignVCenter
-            width: isFocused ? 28 : (hasWindows ? 16 : 10)
-            height: 10
-            radius: 10
-            color: isFocused ? "#f0c830" : (hasWindows ? "#d4b440" : "#514c1b")
-            opacity: isFocused ? 1.0 : (hasWindows ? 0.85 : 0.45)
+            Layout.alignment: Qt.AlignHCenter
+            width: 26
+            height: 26
 
-            Behavior on width   { NumberAnimation { duration: 300; easing.type: Easing.OutBack } }
-            Behavior on color   { ColorAnimation  { duration: 200; easing.type: Easing.OutSine } }
-            Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.OutSine } }
+            // ── Bolita amarilla (workspaces no activos) ──
+            Rectangle {
+                anchors.centerIn: parent
+                width: wsItem.isFocused ? 0 : (wsItem.hasWindows ? 13 : 9)
+                height: width
+                radius: width / 2
+                color: "#FFD700"
+                opacity: wsItem.hasWindows ? 0.95 : 0.45
 
-            scale: wsHover.containsMouse ? 1.3 : 1.0
-            Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+                Behavior on width   { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
+                Behavior on opacity { NumberAnimation { duration: 200 } }
+            }
+
+            // ── Pacman (workspace activo) ──
+            Canvas {
+                id: pacman
+                anchors.centerIn: parent
+                width: wsItem.isFocused ? 24 : 0
+                height: width
+
+                Behavior on width { NumberAnimation { duration: 300; easing.type: Easing.OutBack } }
+
+                property real mouthAngle: 5
+
+                SequentialAnimation on mouthAngle {
+                    running: wsItem.isFocused
+                    loops: Animation.Infinite
+                    NumberAnimation { to: 32; duration: 280; easing.type: Easing.InOutSine }
+                    NumberAnimation { to: 5;  duration: 280; easing.type: Easing.InOutSine }
+                }
+
+                onMouthAngleChanged: requestPaint()
+                onWidthChanged:      requestPaint()
+
+                onPaint: {
+                    var ctx = getContext("2d");
+                    ctx.clearRect(0, 0, width, height);
+                    if (width <= 1) return;
+
+                    var cx = width  / 2;
+                    var cy = height / 2;
+                    var r  = Math.min(width, height) / 2 - 1;
+                    var mRad = mouthAngle * Math.PI / 180;
+
+                    // Cuerpo amarillo
+                    ctx.fillStyle = "#FFD700";
+                    ctx.beginPath();
+                    ctx.moveTo(cx, cy);
+                    ctx.arc(cx, cy, r, mRad, 2 * Math.PI - mRad);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Ojo
+                    ctx.fillStyle = "#1a1a2e";
+                    ctx.beginPath();
+                    ctx.arc(cx + r * 0.18, cy - r * 0.45, r * 0.13, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+            }
 
             MouseArea {
-                id: wsHover
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
