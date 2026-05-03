@@ -4,17 +4,98 @@ import Quickshell
 import Quickshell.Wayland
 
 ShellRoot {
+    // ═══════════════════════════════════════════
+    // MARCO COMPLETO (4 lados) al estilo Caelestia
+    // ═══════════════════════════════════════════
+
+    readonly property int frameThickness: 10
+    readonly property int frameRounding: 24
+
+    // ─── TOP BAR ───
+    PanelWindow {
+        id: topBar
+        anchors { top: true; left: true; right: true }
+        implicitHeight: frameThickness
+        exclusionMode: ExclusionMode.Auto
+        color: "transparent"
+
+        Rectangle {
+            anchors.fill: parent
+            color: "#f5ede4"
+            bottomLeftRadius: frameRounding
+            bottomRightRadius: frameRounding
+
+            Rectangle {
+                anchors.fill: parent
+                color: "black"
+                opacity: 0.1
+                radius: parent.radius
+                z: -1
+                anchors.margins: -2
+            }
+        }
+    }
+
+    // ─── BOTTOM BAR ───
+    PanelWindow {
+        id: bottomBar
+        anchors { bottom: true; left: true; right: true }
+        implicitHeight: frameThickness
+        exclusionMode: ExclusionMode.Auto
+        color: "transparent"
+
+        Rectangle {
+            anchors.fill: parent
+            color: "#f5ede4"
+            topLeftRadius: frameRounding
+            topRightRadius: frameRounding
+
+            Rectangle {
+                anchors.fill: parent
+                color: "black"
+                opacity: 0.1
+                radius: parent.radius
+                z: -1
+                anchors.margins: -2
+            }
+        }
+    }
+
+    // ─── RIGHT BAR ───
+    PanelWindow {
+        id: rightBar
+        anchors { right: true; top: true; bottom: true }
+        implicitWidth: frameThickness
+        exclusionMode: ExclusionMode.Auto
+        color: "transparent"
+
+        Rectangle {
+            anchors.fill: parent
+            color: "#f5ede4"
+            topLeftRadius: frameRounding
+            bottomLeftRadius: frameRounding
+
+            Rectangle {
+                anchors.fill: parent
+                color: "black"
+                opacity: 0.1
+                radius: parent.radius
+                z: -1
+                anchors.margins: -2
+            }
+        }
+    }
+
+    // ─── LEFT BAR (PRINCIPAL) ───
     PanelWindow {
         id: bar
         anchors { left: true; top: true; bottom: true }
-        
-        // El ancho se expande dinámicamente
+
         property int baseWidth: 64
         property int expansionWidth: (appMenu.active || weatherSidebar.open || clockModule.drawerOpen) ? 320 : 0
-        
+
         implicitWidth: baseWidth + expansionWidth
-        
-        // Animación suave estilo "Spring" para la expansión
+
         Behavior on implicitWidth {
             SpringAnimation {
                 spring: 4
@@ -30,10 +111,9 @@ ShellRoot {
             id: barContainer
             anchors.fill: parent
             color: "#f5ede4"
-            topRightRadius: 24
-            bottomRightRadius: 24
-            
-            // Sombra suave para dar profundidad
+            topRightRadius: frameRounding
+            bottomRightRadius: frameRounding
+
             Rectangle {
                 anchors.fill: parent
                 color: "black"
@@ -47,7 +127,6 @@ ShellRoot {
                 anchors.fill: parent
                 spacing: 0
 
-                // ─── Columna de Iconos (Barra Estática) ───
                 ColumnLayout {
                     Layout.fillHeight: true
                     Layout.preferredWidth: bar.baseWidth
@@ -55,14 +134,13 @@ ShellRoot {
                     anchors.bottomMargin: 20
                     spacing: 16
 
-                    // Logo / Launcher
                     Rectangle {
                         id: logoContainer
                         Layout.alignment: Qt.AlignHCenter
                         width: 42; height: 42; radius: 21
                         color: appMenu.active ? "#8b7355" : (logoArea.containsMouse ? "#e8dccb" : "transparent")
                         Behavior on color { ColorAnimation { duration: 200 } }
-                        
+
                         Text { anchors.centerIn: parent; text: "🐻"; font.pixelSize: 22 }
                         MouseArea {
                             id: logoArea; anchors.fill: parent
@@ -87,14 +165,13 @@ ShellRoot {
                     Music         { Layout.alignment: Qt.AlignHCenter }
                     SystemInfo    { Layout.alignment: Qt.AlignHCenter }
 
-                    // Botón Clima
                     Rectangle {
                         id: weatherBtnContainer
                         Layout.alignment: Qt.AlignHCenter
                         width: 42; height: 42; radius: 21
                         color: weatherSidebar.open ? "#8b7355" : (weatherBtn.containsMouse ? "#e8dccb" : "transparent")
                         Behavior on color { ColorAnimation { duration: 200 } }
-                        
+
                         Text { anchors.centerIn: parent; text: "🌤"; font.pixelSize: 20 }
                         MouseArea {
                             id: weatherBtn; anchors.fill: parent
@@ -121,14 +198,12 @@ ShellRoot {
                     }
                 }
 
-                // ─── Área de Contenido Expansible ───
                 Item {
                     id: expansionArea
                     Layout.fillHeight: true
                     Layout.fillWidth: true
-                    clip: true // Importante para ocultar el contenido mientras se expande
-                    
-                    // Separador vertical sutil
+                    clip: true
+
                     Rectangle {
                         anchors.left: parent.left
                         anchors.top: parent.top
@@ -141,7 +216,6 @@ ShellRoot {
                         Behavior on opacity { NumberAnimation { duration: 300 } }
                     }
 
-                    // Cargador de Módulos
                     Item {
                         anchors.fill: parent
                         anchors.margins: 10
