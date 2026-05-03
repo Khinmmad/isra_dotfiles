@@ -28,19 +28,34 @@ ShellRoot {
         }
     }
 
-    // ─── BOTTOM ───
+    // ─── BOTTOM (Dock) ───
     PanelWindow {
+        id: bottomPanel
         anchors { bottom: true; left: true; right: true }
-        implicitHeight: fw
+
+        implicitHeight: dock.hovered ? dock.expandedH : fw
+
+        Behavior on implicitHeight {
+            SpringAnimation { spring: 3; damping: 0.7; epsilon: 0.5 }
+        }
+
         exclusionMode: ExclusionMode.Auto
         color: "transparent"
+
         Rectangle {
             anchors.fill: parent
             color: bg
             topRightRadius: fr
+            clip: true
+
             Rectangle {
                 anchors { top: parent.top; left: parent.left; right: parent.right }
                 height: 1; color: Qt.darker(bg, 1.08)
+            }
+
+            Dock {
+                id: dock
+                anchors.fill: parent
             }
         }
     }
