@@ -5,127 +5,118 @@ import Quickshell.Io
 
 Item {
     id: sysRoot
-    implicitWidth: sysRow.implicitWidth
-    implicitHeight: sysRow.implicitHeight
+    implicitWidth: 36
+    implicitHeight: 36
 
-    property bool barHovered: sysHover.containsMouse
-    property bool popupHovered: false
-    property bool anyHovered: barHovered || popupHovered
-    property bool popupVisible: false
+    property bool drawerOpen: false
+    property string cpuPct: "0"
+    property string ramPct: "0"
 
-    onAnyHoveredChanged: {
-        if (anyHovered) { hideTimer.stop(); showTimer.start() }
-        else            { showTimer.stop(); hideTimer.start() }
-    }
+    Rectangle {
+        anchors.fill: parent
+        radius: 18
+        color: sysArea.containsMouse
+            ? "#8b7355"
+            : (sysRoot.drawerOpen ? "#e8dccb" : "#efe4d4")
+        Behavior on color { ColorAnimation { duration: 150 } }
+        scale: sysArea.pressed ? 0.9 : (sysArea.containsMouse ? 1.1 : 1.0)
+        Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutBack } }
 
-    Timer { id: showTimer; interval: 200; onTriggered: sysRoot.popupVisible = true }
-    Timer { id: hideTimer; interval: 500; onTriggered: if (!sysRoot.anyHovered) sysRoot.popupVisible = false }
+        Text { anchors.centerIn: parent; text: "💻"; font.pixelSize: 16 }
 
-    RowLayout {
-        id: sysRow
-        spacing: 10
-
-        // CPU
-        Rectangle {
-            Layout.alignment: Qt.AlignVCenter
-            height: 32; width: cpuText.implicitWidth + 20
-            radius: 16; color: "#2b2810"
-            border.color: "#514c1b"; border.width: 1
-            Text {
-                id: cpuText
-                anchors.centerIn: parent
-                text: "⚙️ --%"
-                color: "#ff8c42"
-                font.pixelSize: 13; font.bold: true
-            }
-        }
-
-        // RAM
-        Rectangle {
-            Layout.alignment: Qt.AlignVCenter
-            height: 32; width: ramText.implicitWidth + 20
-            radius: 16; color: "#2b2810"
-            border.color: "#514c1b"; border.width: 1
-            Text {
-                id: ramText
-                anchors.centerIn: parent
-                text: "🧠 --%"
-                color: "#c8e882"
-                font.pixelSize: 13; font.bold: true
-            }
+        MouseArea {
+            id: sysArea; anchors.fill: parent
+            hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+            onClicked: sysRoot.drawerOpen = !sysRoot.drawerOpen
         }
     }
-
-    MouseArea { id: sysHover; anchors.fill: sysRow; hoverEnabled: true }
 
     PopupWindow {
-        id: sysPopup
+        id: drawer
         anchor.item: sysRoot
-        anchor.edges: Edges.Bottom; anchor.gravity: Edges.Bottom
-        anchor.adjustment: PopupAdjustment.Slide
-        implicitWidth: 200; implicitHeight: 130
-        visible: sysRoot.popupVisible
+        anchor.edges: Edges.Right
+        anchor.gravity: Edges.Right
+        anchor.adjustment: PopupAdjustment.SlideY
+        implicitWidth: 260; implicitHeight: 180
+        visible: sysRoot.drawerOpen
         color: "transparent"
 
         Rectangle {
-            width: 200; height: 130
-            color: "#1d1b09"; radius: 20
-            border.color: "#514c1b"; border.width: 1
+            anchors.fill: parent
+            color: "#f5ede4"; radius: 20
+            border.color: "#8b7355"; border.width: 1
 
-            opacity: sysRoot.popupVisible ? 1.0 : 0.0
-            scale:   sysRoot.popupVisible ? 1.0 : 0.95
+            opacity: sysRoot.drawerOpen ? 1.0 : 0.0
+            scale:   sysRoot.drawerOpen ? 1.0 : 0.95
             Behavior on opacity { NumberAnimation { duration: 200 } }
             Behavior on scale   { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
-
-            MouseArea {
-                anchors.fill: parent; hoverEnabled: true
-                onContainsMouseChanged: sysRoot.popupHovered = containsMouse
-            }
 
             ColumnLayout {
                 anchors.fill: parent; anchors.margins: 16; spacing: 12
 
-                Text {
-                    text: "Estado del Sistema"
-                    color: "#fef3c7"; font.pixelSize: 14; font.bold: true
-                    Layout.alignment: Qt.AlignHCenter
+                RowLayout {
+                    Text { text: "💻 Sistema"; color: "#8b4a3f"
+                        font.pixelSize: 14; font.bold: true }
+                    Item { Layout.fillWidth: true }
+                    Rectangle {
+                        width: 24; height: 24; radius: 12
+                        color: closeArea.containsMouse ? "#cc6e28" : "#efe4d4"
+                        Behavior on color { ColorAnimation { duration: 120 } }
+                        Text { anchors.centerIn: parent; text: "✕"
+                            font.pixelSize: 10; color: "#1f1b16" }
+                        MouseArea {
+                            id: closeArea; anchors.fill: parent
+                            hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                            onClicked: sysRoot.drawerOpen = false
+                        }
+                    }
                 }
 
+                Rectangle { Layout.fillWidth: true; height: 1; color: "#e8dccb" }
+
+                // CPU
                 ColumnLayout {
                     spacing: 4
                     RowLayout {
-                        Text { text: "CPU";    color: "#cc6e28"; font.pixelSize: 11; font.bold: true }
+                        Text { text: "⚙️ CPU"; color: "#cc6e28"
+                            font.pixelSize: 12; font.bold: true }
                         Item { Layout.fillWidth: true }
-                        Text { text: cpuText.text.split(" ")[1]; color: "#ddc880"; font.pixelSize: 11 }
+                        Text { text: sysRoot.cpuPct + "%"; color: "#1f1b16"
+                            font.pixelSize: 12; font.bold: true }
                     }
                     Rectangle {
-                        Layout.fillWidth: true; height: 6; radius: 3; color: "#393616"
+                        Layout.fillWidth: true; height: 8; radius: 4; color: "#e8dccb"
                         Rectangle {
-                            height: parent.height; radius: 3
-                            width: parent.width * (parseFloat(cpuText.text.split(" ")[1]) / 100)
+                            height: parent.height; radius: 4
+                            width: parent.width * (parseFloat(sysRoot.cpuPct) / 100)
                             color: "#cc6e28"
                             Behavior on width { NumberAnimation { duration: 500 } }
                         }
                     }
                 }
 
+                // RAM
                 ColumnLayout {
                     spacing: 4
                     RowLayout {
-                        Text { text: "Memoria"; color: "#96c836"; font.pixelSize: 11; font.bold: true }
+                        Text { text: "🧠 Memoria"; color: "#96c836"
+                            font.pixelSize: 12; font.bold: true }
                         Item { Layout.fillWidth: true }
-                        Text { text: ramText.text.split(" ")[1]; color: "#ddc880"; font.pixelSize: 11 }
+                        Text { text: sysRoot.ramPct + "%"; color: "#1f1b16"
+                            font.pixelSize: 12; font.bold: true }
                     }
                     Rectangle {
-                        Layout.fillWidth: true; height: 6; radius: 3; color: "#393616"
+                        Layout.fillWidth: true; height: 8; radius: 4; color: "#e8dccb"
                         Rectangle {
-                            height: parent.height; radius: 3
-                            width: parent.width * (parseFloat(ramText.text.split(" ")[1]) / 100)
+                            height: parent.height; radius: 4
+                            width: parent.width * (parseFloat(sysRoot.ramPct) / 100)
                             color: "#96c836"
                             Behavior on width { NumberAnimation { duration: 500 } }
                         }
                     }
                 }
+
+                Item { Layout.fillHeight: true }
             }
         }
     }
@@ -134,14 +125,14 @@ Item {
         id: ramProc
         command: ["bash", "-c", "free -m | awk '/^Mem/ {printf \"%.0f\", $3/$2 * 100}'"]
         stdout: StdioCollector { id: ramOut }
-        onExited: ramText.text = "🧠 " + ramOut.text.trim() + "%"
+        onExited: sysRoot.ramPct = ramOut.text.trim()
     }
 
     Process {
         id: cpuProc
         command: ["bash", "-c", "top -bn1 | grep \"Cpu(s)\" | sed \"s/.*, *\\([0-9.]*\\)%* id.*/\\1/\" | awk '{printf \"%.0f\", 100 - $1}'"]
         stdout: StdioCollector { id: cpuOut }
-        onExited: cpuText.text = "⚙️ " + cpuOut.text.trim() + "%"
+        onExited: sysRoot.cpuPct = cpuOut.text.trim()
     }
 
     Timer {

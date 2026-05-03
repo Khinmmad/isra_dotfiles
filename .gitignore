@@ -1,0 +1,45 @@
+# Browser/IDE cache & data
+**/Cache/
+**/CachedData/
+**/CachedExtensionVSIXs/
+**/CachedProfilesData/
+**/Code Cache/
+**/Crashpad/
+**/DawnGraphiteCache/
+**/DawnWebGPUCache/
+**/GPUCache/
+**/Local Storage/
+**/Service Worker/
+**/Session Storage/
+**/WebStorage/
+**/SharedStorage/
+**/Shared Dictionary/
+**/logs/
+**/node_modules/
+**/User/History/
+**/User/globalStorage/
+**/User/workspaceStorage/
+
+# Binary/system files
+**/Cookies
+**/Cookies-journal
+**/DIPS
+**/DIPS-wal
+**/Network Persistent State
+**/TransportSecurity
+**/Trust Tokens
+**/Trust Tokens-journal
+*.dmp
+*.bdic
+dconf/
+pulse/
+procps/
+session/
+**/go/telemetry/
+
+# Backups
+*.bak/
+*quickshell.bak*/
+
+# IDE
+Antigravity/

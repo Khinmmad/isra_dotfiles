@@ -4,186 +4,171 @@ import Quickshell
 import Quickshell.Wayland
 
 ShellRoot {
-
-    // ══════════════════════════════════════
-    //  BARRA SUPERIOR — ancho completo
-    // ══════════════════════════════════════
     PanelWindow {
-        id: topPanel
-        anchors { top: true; left: true; right: true; bottom: false }
-        margins { top: 0; left: 0; right: 0 }
-        implicitHeight: 48
+        id: bar
+        anchors { left: true; top: true; bottom: true }
+        
+        // El ancho se expande dinámicamente
+        property int baseWidth: 64
+        property int expansionWidth: (appMenu.active || weatherSidebar.open || clockModule.drawerOpen) ? 320 : 0
+        
+        implicitWidth: baseWidth + expansionWidth
+        
+        // Animación suave estilo "Spring" para la expansión
+        Behavior on implicitWidth {
+            SpringAnimation {
+                spring: 4
+                damping: 0.8
+                epsilon: 0.5
+            }
+        }
+
+        exclusionMode: ExclusionMode.Auto
         color: "transparent"
 
         Rectangle {
-            id: panelRect
+            id: barContainer
             anchors.fill: parent
-            color: "#1d1b09"
-
-            // Borde inferior que conecta visualmente con las barras laterales
+            color: "#f5ede4"
+            topRightRadius: 24
+            bottomRightRadius: 24
+            
+            // Sombra suave para dar profundidad
             Rectangle {
-                anchors.left: parent.left; anchors.right: parent.right
-                anchors.bottom: parent.bottom; height: 1
-                color: "#514c1b"
+                anchors.fill: parent
+                color: "black"
+                opacity: 0.1
+                radius: parent.radius
+                z: -1
+                anchors.margins: -2
             }
-
-            scale: 0.98; opacity: 0.0
-            Component.onCompleted: { scale = 1.0; opacity = 1.0 }
-            Behavior on scale   { NumberAnimation { duration: 400; easing.type: Easing.OutBack } }
-            Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.OutSine } }
 
             RowLayout {
                 anchors.fill: parent
-                anchors.margins: 8
-                spacing: 20
+                spacing: 0
 
-                // Logo / menú
-                Rectangle {
-                    id: logoContainer
-                    Layout.alignment: Qt.AlignVCenter
-                    Layout.leftMargin: 6
-                    width: 32; height: 32; radius: 16
-                    color: logoArea.containsMouse ? "#514c1b" : "#393616"
-                    Behavior on color { ColorAnimation { duration: 150 } }
-                    Text { anchors.centerIn: parent; text: "🐻"; font.pixelSize: 16 }
-                    MouseArea {
-                        id: logoArea; anchors.fill: parent
-                        hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                        onClicked: appMenu.toggle()
-                    }
-                }
+                // ─── Columna de Iconos (Barra Estática) ───
+                ColumnLayout {
+                    Layout.fillHeight: true
+                    Layout.preferredWidth: bar.baseWidth
+                    anchors.topMargin: 20
+                    anchors.bottomMargin: 20
+                    spacing: 16
 
-                Workspaces { Layout.alignment: Qt.AlignVCenter }
-
-                Item { Layout.fillWidth: true }
-
-                NetworkStatus { Layout.alignment: Qt.AlignVCenter }
-
-                Item {
-                    width: 16; height: 32; Layout.alignment: Qt.AlignVCenter
-                    Rectangle { anchors.centerIn: parent; width: 1; height: 16; color: "#514c1b" }
-                }
-
-                SystemInfo { Layout.alignment: Qt.AlignVCenter }
-                Music       { Layout.alignment: Qt.AlignVCenter }
-                BarClock    { Layout.alignment: Qt.AlignVCenter }
-            }
-
-            Launcher { id: appMenu; anchorItem: logoContainer }
-        }
-    }
-
-    // ══════════════════════════════════════
-    //  BARRA IZQUIERDA — borde izquierdo
-    // ══════════════════════════════════════
-    PanelWindow {
-        anchors { left: true; top: true; bottom: true; right: false }
-        margins { top: 48; bottom: 0; left: 0 }
-        implicitWidth: 6
-        color: "transparent"
-
-        Rectangle {
-            anchors.fill: parent
-            color: "#1d1b09"
-            // Línea de borde derecha (visual, hacia el interior)
-            Rectangle {
-                anchors.right: parent.right; anchors.top: parent.top; anchors.bottom: parent.bottom
-                width: 1; color: "#514c1b"
-            }
-        }
-    }
-
-    // ══════════════════════════════════════
-    //  BARRA DERECHA — panel clima + borde
-    // ══════════════════════════════════════
-    PanelWindow {
-        id: rightPanel
-        anchors { right: true; top: true; bottom: true; left: false }
-        margins { top: 48; bottom: 0; right: 0 }
-        implicitWidth: 48
-        color: "transparent"
-
-        property bool weatherOpen: false
-
-        Rectangle {
-            id: rightPanelRect
-            anchors.fill: parent
-            color: "#1d1b09"
-
-            // Línea de borde izquierda
-            Rectangle {
-                anchors.left: parent.left; anchors.top: parent.top; anchors.bottom: parent.bottom
-                width: 1; color: "#514c1b"
-            }
-
-            Column {
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: parent.top
-                anchors.topMargin: 16
-                spacing: 20
-
-                // Botón para abrir/cerrar sidebar de clima
-                Rectangle {
-                    width: 36; height: 36; radius: 18
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    color: weatherBtn.containsMouse
-                        ? "#514c1b"
-                        : (rightPanel.weatherOpen ? "#393616" : "#2b2810")
-                    Behavior on color { ColorAnimation { duration: 150 } }
-                    scale: weatherBtn.pressed ? 0.9 : (weatherBtn.containsMouse ? 1.1 : 1.0)
-                    Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutBack } }
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "🌤"
-                        font.pixelSize: 17
-                    }
-
-                    // Indicador activo
+                    // Logo / Launcher
                     Rectangle {
-                        visible: rightPanel.weatherOpen
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.bottom: parent.bottom
-                        anchors.bottomMargin: -6
-                        width: 4; height: 4; radius: 2
-                        color: "#f0c830"
+                        id: logoContainer
+                        Layout.alignment: Qt.AlignHCenter
+                        width: 42; height: 42; radius: 21
+                        color: appMenu.active ? "#8b7355" : (logoArea.containsMouse ? "#e8dccb" : "transparent")
+                        Behavior on color { ColorAnimation { duration: 200 } }
+                        
+                        Text { anchors.centerIn: parent; text: "🐻"; font.pixelSize: 22 }
+                        MouseArea {
+                            id: logoArea; anchors.fill: parent
+                            hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                weatherSidebar.open = false;
+                                appMenu.active = !appMenu.active;
+                            }
+                        }
                     }
 
-                    MouseArea {
-                        id: weatherBtn; anchors.fill: parent
-                        hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                        onClicked: rightPanel.weatherOpen = !rightPanel.weatherOpen
+                    Rectangle {
+                        Layout.alignment: Qt.AlignHCenter
+                        width: 24; height: 1; color: "#8b7355"; opacity: 0.2
+                    }
+
+                    Workspaces { Layout.alignment: Qt.AlignHCenter }
+
+                    Item { Layout.fillHeight: true }
+
+                    NetworkStatus { Layout.alignment: Qt.AlignHCenter }
+                    Music         { Layout.alignment: Qt.AlignHCenter }
+                    SystemInfo    { Layout.alignment: Qt.AlignHCenter }
+
+                    // Botón Clima
+                    Rectangle {
+                        id: weatherBtnContainer
+                        Layout.alignment: Qt.AlignHCenter
+                        width: 42; height: 42; radius: 21
+                        color: weatherSidebar.open ? "#8b7355" : (weatherBtn.containsMouse ? "#e8dccb" : "transparent")
+                        Behavior on color { ColorAnimation { duration: 200 } }
+                        
+                        Text { anchors.centerIn: parent; text: "🌤"; font.pixelSize: 20 }
+                        MouseArea {
+                            id: weatherBtn; anchors.fill: parent
+                            hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                appMenu.active = false;
+                                weatherSidebar.open = !weatherSidebar.open;
+                            }
+                        }
+                    }
+
+                    BarClock {
+                        id: clockModule
+                        Layout.alignment: Qt.AlignHCenter
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                appMenu.active = false;
+                                weatherSidebar.open = false;
+                                clockModule.drawerOpen = !clockModule.drawerOpen;
+                            }
+                        }
                     }
                 }
-            }
 
-            // Sidebar de clima (PopupWindow que se desliza desde la derecha)
-            WeatherSidebar {
-                id: weatherSidebar
-                anchorItem: rightPanelRect
-                open: rightPanel.weatherOpen
-                onCloseRequested: rightPanel.weatherOpen = false
-            }
-        }
-    }
+                // ─── Área de Contenido Expansible ───
+                Item {
+                    id: expansionArea
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+                    clip: true // Importante para ocultar el contenido mientras se expande
+                    
+                    // Separador vertical sutil
+                    Rectangle {
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        anchors.topMargin: 20
+                        anchors.bottomMargin: 20
+                        width: 1
+                        color: "#8b7355"
+                        opacity: expansionWidth > 0 ? 0.1 : 0.0
+                        Behavior on opacity { NumberAnimation { duration: 300 } }
+                    }
 
-    // ══════════════════════════════════════
-    //  BARRA INFERIOR — borde inferior
-    // ══════════════════════════════════════
-    PanelWindow {
-        anchors { bottom: true; left: true; right: true; top: false }
-        margins { bottom: 0; left: 6; right: 48 }
-        implicitHeight: 6
-        color: "transparent"
+                    // Cargador de Módulos
+                    Item {
+                        anchors.fill: parent
+                        anchors.margins: 10
+                        opacity: expansionWidth > 300 ? 1.0 : 0.0
+                        Behavior on opacity { NumberAnimation { duration: 200 } }
 
-        Rectangle {
-            anchors.fill: parent
-            color: "#1d1b09"
-            // Línea de borde superior
-            Rectangle {
-                anchors.left: parent.left; anchors.right: parent.right
-                anchors.top: parent.top; height: 1
-                color: "#514c1b"
+                        Launcher {
+                            id: appMenu
+                            visible: active
+                            anchors.fill: parent
+                        }
+
+                        WeatherSidebar {
+                            id: weatherSidebar
+                            visible: open
+                            anchors.fill: parent
+                            onCloseRequested: open = false
+                        }
+
+                        BarClock {
+                            id: clockExpanded
+                            drawerOpen: true
+                            visible: clockModule.drawerOpen
+                            anchors.fill: parent
+                        }
+                    }
+                }
             }
         }
     }

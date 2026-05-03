@@ -6,70 +6,53 @@ import Quickshell.Io
 Item {
     id: launcherRoot
     property bool active: false
-    property var anchorItem: null
 
-    function toggle() { active = !active }
+    Rectangle {
+        anchors.fill: parent
+        color: "transparent" // El fondo lo pone la barra
 
-    PopupWindow {
-        id: launcherPopup
-        anchor.item: launcherRoot.anchorItem
-        anchor.edges: Edges.Bottom; anchor.gravity: Edges.Bottom
-        anchor.adjustment: PopupAdjustment.Slide
-        implicitWidth: 320; implicitHeight: 480
-        visible: launcherRoot.active
-        color: "transparent"
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 14
+            spacing: 16
 
-        Rectangle {
-            width: 320; height: 480
-            color: "#1d1b09"; radius: 24
-            border.color: "#514c1b"; border.width: 1
-
-            opacity: launcherRoot.active ? 1.0 : 0.0
-            scale:   launcherRoot.active ? 1.0 : 0.95
-            Behavior on opacity { NumberAnimation { duration: 200 } }
-            Behavior on scale   { NumberAnimation { duration: 300; easing.type: Easing.OutBack } }
-
-            ColumnLayout {
-                anchors.fill: parent; anchors.margins: 24; spacing: 20
-
-                // Header
-                RowLayout {
-                    spacing: 12
-                    Rectangle {
-                        width: 48; height: 48; radius: 24
-                        color: "#2b2810"
-                        Text { anchors.centerIn: parent; text: "🐻"; font.pixelSize: 24 }
-                    }
-                    Column {
-                        Text { text: "Bienvenido";     color: "#9e8438"; font.pixelSize: 12 }
-                        Text { text: "Quickshell Menu"; color: "#fef3c7"; font.pixelSize: 16; font.bold: true }
-                    }
+            // Header
+            RowLayout {
+                spacing: 10
+                Rectangle {
+                    width: 36; height: 36; radius: 18
+                    color: "#efe4d4"
+                    Text { anchors.centerIn: parent; text: "🐻"; font.pixelSize: 18 }
                 }
-
-                Rectangle { Layout.fillWidth: true; height: 1; color: "#393616" }
-
-                // App Grid
-                GridLayout {
-                    columns: 3; rowSpacing: 20; columnSpacing: 20
-                    Layout.fillWidth: true
-
-                    AppButton { icon: "💻"; label: "Terminal"; cmd: "kitty";    color: "#cc6e28" }
-                    AppButton { icon: "🌐"; label: "Web";      cmd: "firefox";  color: "#d4b440" }
-                    AppButton { icon: "📁"; label: "Archivos"; cmd: "thunar";   color: "#e09838" }
-                    AppButton { icon: "📝"; label: "Editor";   cmd: "code";     color: "#96c836" }
-                    AppButton { icon: "🎵"; label: "Música";   cmd: "spotify";  color: "#1db954" }
-                    AppButton { icon: "⚙️"; label: "Ajustes";  cmd: "nwg-look"; color: "#a0c840" }
+                Column {
+                    Text { text: "Bienvenido";     color: "#9e8438"; font.pixelSize: 10 }
+                    Text { text: "Quickshell Menu"; color: "#1f1b16"; font.pixelSize: 13; font.bold: true }
                 }
+            }
 
-                Item { Layout.fillHeight: true }
+            Rectangle { Layout.fillWidth: true; height: 1; color: "#e8dccb" }
 
-                // Power Menu
-                RowLayout {
-                    Layout.fillWidth: true; spacing: 12
-                    PowerButton { icon: "󰐥"; label: "Apagar";   cmd: "shutdown now";             accentColor: "#cc6e28" }
-                    PowerButton { icon: "󰜉"; label: "Reiniciar"; cmd: "reboot";                   accentColor: "#e09838" }
-                    PowerButton { icon: "󰍃"; label: "Salir";     cmd: "hyprctl dispatch exit";    accentColor: "#f0c830" }
-                }
+            // App Grid
+            GridLayout {
+                columns: 3; rowSpacing: 16; columnSpacing: 16
+                Layout.fillWidth: true
+
+                AppButton { icon: "💻"; label: "Terminal"; cmd: "kitty";    color: "#cc6e28" }
+                AppButton { icon: "🌐"; label: "Web";      cmd: "firefox";  color: "#d4b440" }
+                AppButton { icon: "📁"; label: "Archivos"; cmd: "thunar";   color: "#e09838" }
+                AppButton { icon: "📝"; label: "Editor";   cmd: "code";     color: "#96c836" }
+                AppButton { icon: "🎵"; label: "Música";   cmd: "spotify";  color: "#1db954" }
+                AppButton { icon: "⚙️"; label: "Ajustes";  cmd: "nwg-look"; color: "#a0c840" }
+            }
+
+            Item { Layout.fillHeight: true }
+
+            // Power Menu
+            RowLayout {
+                Layout.fillWidth: true; spacing: 8
+                PowerButton { icon: "󰐥"; label: "Apagar";   cmd: "shutdown now";             accentColor: "#cc6e28" }
+                PowerButton { icon: "󰜉"; label: "Reiniciar"; cmd: "reboot";                   accentColor: "#e09838" }
+                PowerButton { icon: "󰍃"; label: "Salir";     cmd: "hyprctl dispatch exit";    accentColor: "#8b4a3f" }
             }
         }
     }
@@ -78,20 +61,20 @@ Item {
         property string icon: ""
         property string label: ""
         property string cmd: ""
-        property string color: "#f0c830"
+        property string color: "#8b4a3f"
 
-        spacing: 8
+        spacing: 6
         Layout.alignment: Qt.AlignHCenter
 
         Rectangle {
             id: btnRect
-            width: 64; height: 64; radius: 16
-            color: mouseArea.containsMouse ? "#2b2810" : "#1a1808"
+            width: 56; height: 56; radius: 14
+            color: mouseArea.containsMouse ? "#efe4d4" : "#efe4d4"
             border.color: mouseArea.containsMouse ? color : "transparent"
             border.width: 2
-            Behavior on color { ColorAnimation { duration: 150 } }
+            Behavior on border.color { ColorAnimation { duration: 150 } }
 
-            Text { anchors.centerIn: parent; text: icon; font.pixelSize: 32 }
+            Text { anchors.centerIn: parent; text: icon; font.pixelSize: 28 }
 
             MouseArea {
                 id: mouseArea; anchors.fill: parent
@@ -104,7 +87,7 @@ Item {
         }
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: label; color: "#fef3c7"; font.pixelSize: 11; font.bold: true
+            text: label; color: "#1f1b16"; font.pixelSize: 10; font.bold: true
         }
     }
 
@@ -114,14 +97,14 @@ Item {
         property string cmd: ""
         property string accentColor: ""
 
-        Layout.fillWidth: true; height: 44; radius: 12
-        color: pArea.containsMouse ? accentColor : "#2b2810"
+        Layout.fillWidth: true; height: 38; radius: 10
+        color: pArea.containsMouse ? accentColor : "#efe4d4"
         Behavior on color { ColorAnimation { duration: 150 } }
 
         RowLayout {
-            anchors.centerIn: parent; spacing: 8
-            Text { text: icon;  font.pixelSize: 16; color: pArea.containsMouse ? "#1d1b09" : accentColor }
-            Text { text: label; font.pixelSize: 12; font.bold: true; color: pArea.containsMouse ? "#1d1b09" : "#fef3c7" }
+            anchors.centerIn: parent; spacing: 6
+            Text { text: icon;  font.pixelSize: 14; color: pArea.containsMouse ? "#f5ede4" : accentColor }
+            Text { text: label; font.pixelSize: 11; font.bold: true; color: pArea.containsMouse ? "#f5ede4" : "#1f1b16" }
         }
 
         MouseArea {

@@ -5,13 +5,13 @@ import Quickshell.Io
 
 Item {
     id: netRoot
-    implicitWidth: netRow.implicitWidth
-    implicitHeight: netRow.implicitHeight
+    implicitWidth: 36
+    implicitHeight: 36
 
+    property bool drawerOpen: false
     property string currentSSID: ""
     property string connectionStatus: "Escaneando..."
     property bool isConnected: currentSSID !== ""
-    property bool popupVisible: false
     property var wifiNetworks: []
     property string connectingSSID: ""
 
@@ -22,7 +22,8 @@ Item {
         onExited: {
             let ssid = currentOut.text.trim();
             netRoot.currentSSID = ssid;
-            netRoot.connectionStatus = ssid !== "" ? ("Conectado a " + ssid) : "Sin conexión";
+            netRoot.connectionStatus = ssid !== ""
+                ? ("Conectado a " + ssid) : "Sin conexión";
         }
     }
 
@@ -71,110 +72,106 @@ Item {
         onTriggered: currentProc.running = true
     }
 
-    // ── Indicador en barra ──
-    RowLayout {
-        id: netRow; spacing: 6
-        Rectangle {
-            Layout.alignment: Qt.AlignVCenter
-            height: 32; width: netLabel.implicitWidth + 40
-            radius: 16
-            color: netHover.containsMouse ? "#514c1b" : "#2b2810"
-            border.color: "#514c1b"; border.width: 1
-            Behavior on color { ColorAnimation { duration: 150 } }
+    // ─── Icono en la barra ───
+    Rectangle {
+        anchors.fill: parent
+        radius: 18
+        color: netArea.containsMouse
+            ? "#8b7355"
+            : (netRoot.drawerOpen ? "#e8dccb" : "#efe4d4")
+        Behavior on color { ColorAnimation { duration: 150 } }
+        scale: netArea.pressed ? 0.9 : (netArea.containsMouse ? 1.1 : 1.0)
+        Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutBack } }
 
-            RowLayout {
-                anchors.centerIn: parent; spacing: 6
-                Text { text: netRoot.isConnected ? "📶" : "📡"; font.pixelSize: 14 }
-                Text {
-                    id: netLabel
-                    text: netRoot.isConnected ? netRoot.currentSSID : "WiFi"
-                    color: netRoot.isConnected ? "#c8e882" : "#f0c830"
-                    font.pixelSize: 12; font.bold: true; elide: Text.ElideRight
-                }
+        Text {
+            anchors.centerIn: parent
+            text: netRoot.isConnected ? "📶" : "📡"
+            font.pixelSize: 16
+        }
+
+        MouseArea {
+            id: netArea; anchors.fill: parent
+            hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+            onClicked: {
+                netRoot.drawerOpen = !netRoot.drawerOpen;
+                if (netRoot.drawerOpen) scanProc.running = true;
             }
         }
     }
 
-    MouseArea {
-        id: netHover; anchors.fill: netRow
-        hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-        onClicked: {
-            netRoot.popupVisible = !netRoot.popupVisible;
-            if (netRoot.popupVisible) scanProc.running = true;
-        }
-    }
-
-    // ── Popup ──
+    // ─── Drawer ───
     PopupWindow {
-        id: netPopup
-        anchor.item: netRoot; anchor.edges: Edges.Bottom; anchor.gravity: Edges.Bottom
-        anchor.adjustment: PopupAdjustment.Slide
-        implicitWidth: 300; implicitHeight: 400
-        visible: netRoot.popupVisible
+        id: drawer
+        anchor.item: netRoot
+        anchor.edges: Edges.Right
+        anchor.gravity: Edges.Right
+        anchor.adjustment: PopupAdjustment.SlideY
+        implicitWidth: 320; implicitHeight: 420
+        visible: netRoot.drawerOpen
         color: "transparent"
 
         Rectangle {
             anchors.fill: parent
-            color: "#1d1b09"; radius: 24
-            border.color: "#514c1b"; border.width: 1
+            color: "#f5ede4"; radius: 24
+            border.color: "#8b7355"; border.width: 1
 
-            opacity: netRoot.popupVisible ? 1.0 : 0.0
-            scale:   netRoot.popupVisible ? 1.0 : 0.95
-            Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.OutSine } }
+            opacity: netRoot.drawerOpen ? 1.0 : 0.0
+            scale:   netRoot.drawerOpen ? 1.0 : 0.95
+            Behavior on opacity { NumberAnimation { duration: 200 } }
             Behavior on scale   { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
 
             ColumnLayout {
                 anchors.fill: parent; anchors.margins: 16; spacing: 8
 
-                // Header
                 RowLayout {
                     spacing: 8
-                    Text { text: "📶 Redes WiFi"; color: "#fef3c7"; font.pixelSize: 15; font.bold: true }
+                    Text { text: "📶 Redes WiFi"; color: "#8b4a3f"
+                        font.pixelSize: 14; font.bold: true }
                     Item { Layout.fillWidth: true }
-                    // Rescan
                     Rectangle {
-                        width: 28; height: 28; radius: 14
-                        color: rescanArea.containsMouse ? "#514c1b" : "#2b2810"
+                        width: 26; height: 26; radius: 13
+                        color: rescanArea.containsMouse ? "#8b7355" : "#efe4d4"
                         Behavior on color { ColorAnimation { duration: 120 } }
-                        scale: rescanArea.containsMouse ? 1.1 : 1.0
-                        Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutBack } }
                         Text {
-                            anchors.centerIn: parent; text: "🔄"; font.pixelSize: 13
-                            RotationAnimation on rotation { id: spinAnim; from: 0; to: 360; duration: 800; running: false }
+                            anchors.centerIn: parent; text: "🔄"; font.pixelSize: 12
+                            RotationAnimation on rotation {
+                                id: spinAnim; from: 0; to: 360; duration: 800; running: false
+                            }
                         }
-                        MouseArea {
-                            id: rescanArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                        MouseArea { id: rescanArea; anchors.fill: parent
+                            hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                             onClicked: { spinAnim.running = true; scanProc.running = true; }
                         }
                     }
-                    // Cerrar
                     Rectangle {
-                        width: 28; height: 28; radius: 14
-                        color: closeArea.containsMouse ? "#cc6e28" : "#2b2810"
+                        width: 26; height: 26; radius: 13
+                        color: closeArea.containsMouse ? "#cc6e28" : "#efe4d4"
                         Behavior on color { ColorAnimation { duration: 120 } }
-                        Text { anchors.centerIn: parent; text: "✕"; font.pixelSize: 11; color: "#fef3c7" }
-                        MouseArea { id: closeArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: netRoot.popupVisible = false }
+                        Text { anchors.centerIn: parent; text: "✕"
+                            font.pixelSize: 10; color: "#1f1b16" }
+                        MouseArea { id: closeArea; anchors.fill: parent
+                            hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                            onClicked: netRoot.drawerOpen = false
+                        }
                     }
                 }
 
-                // Estado actual
                 Rectangle {
-                    Layout.fillWidth: true; height: 32; radius: 10; color: "#2b2810"
+                    Layout.fillWidth: true; height: 32; radius: 10; color: "#efe4d4"
                     RowLayout {
                         anchors.fill: parent; anchors.margins: 8; spacing: 6
                         Text { text: netRoot.isConnected ? "✅" : "❌"; font.pixelSize: 12 }
                         Text {
                             text: netRoot.connectionStatus
                             color: netRoot.isConnected ? "#96c836" : "#cc6e28"
-                            font.pixelSize: 11; font.bold: true; elide: Text.ElideRight
-                            Layout.fillWidth: true
+                            font.pixelSize: 11; font.bold: true
+                            elide: Text.ElideRight; Layout.fillWidth: true
                         }
                     }
                 }
 
-                Rectangle { Layout.fillWidth: true; height: 1; color: "#393616" }
+                Rectangle { Layout.fillWidth: true; height: 1; color: "#e8dccb" }
 
-                // Lista de redes
                 Flickable {
                     Layout.fillWidth: true; Layout.fillHeight: true
                     contentHeight: netListCol.implicitHeight; clip: true
@@ -192,7 +189,9 @@ Item {
                                 property bool isConnecting: net.ssid === netRoot.connectingSSID
 
                                 width: netListCol.width; height: 44; radius: 10
-                                color: netItemArea.containsMouse ? "#393616" : (isCurrentNet ? "#2b281080" : "transparent")
+                                color: netItemArea.containsMouse
+                                    ? "#e8dccb"
+                                    : (isCurrentNet ? "#efe4d4" : "transparent")
                                 Behavior on color { ColorAnimation { duration: 120 } }
 
                                 RowLayout {
@@ -200,30 +199,32 @@ Item {
 
                                     Text {
                                         text: net.signal >= 50 ? "📶" : "📡"
-                                        font.pixelSize: 14; Layout.alignment: Qt.AlignVCenter
+                                        font.pixelSize: 14
+                                        Layout.alignment: Qt.AlignVCenter
                                     }
 
                                     Column {
-                                        Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter; spacing: 1
+                                        Layout.fillWidth: true
+                                        Layout.alignment: Qt.AlignVCenter; spacing: 1
                                         Text {
                                             text: net.ssid
-                                            color: isCurrentNet ? "#96c836" : "#fef3c7"
+                                            color: isCurrentNet ? "#96c836" : "#1f1b16"
                                             font.pixelSize: 12; font.bold: true
                                             elide: Text.ElideRight; width: parent.width
                                         }
                                         Text {
                                             text: {
                                                 let p = [net.signal + "%"];
-                                                if (net.security !== "" && net.security !== "--") p.push("🔒");
+                                                if (net.security !== "" && net.security !== "--")
+                                                    p.push("🔒");
                                                 if (isCurrentNet) p.push("Conectado");
                                                 if (isConnecting) p.push("Conectando...");
                                                 return p.join("  ");
                                             }
-                                            color: "#9e8438"; font.pixelSize: 9
+                                            color: "#5c5248"; font.pixelSize: 9
                                         }
                                     }
 
-                                    // Barras de señal
                                     Row {
                                         spacing: 2; Layout.alignment: Qt.AlignVCenter
                                         Repeater {
@@ -232,8 +233,8 @@ Item {
                                                 required property int index
                                                 width: 3; height: 6 + index * 4; radius: 1
                                                 color: net.signal >= (index + 1) * 25
-                                                    ? (isCurrentNet ? "#96c836" : "#f0c830")
-                                                    : "#514c1b"
+                                                    ? (isCurrentNet ? "#96c836" : "#8b4a3f")
+                                                    : "#8b7355"
                                                 anchors.bottom: parent.bottom
                                             }
                                         }
@@ -247,7 +248,8 @@ Item {
                                         if (!isCurrentNet && !isConnecting) {
                                             netRoot.connectingSSID = net.ssid;
                                             connectProc.command = ["bash", "-c",
-                                                "nmcli device wifi connect " + JSON.stringify(net.ssid)];
+                                                "nmcli device wifi connect "
+                                                + JSON.stringify(net.ssid)];
                                             connectProc.running = true;
                                         }
                                     }

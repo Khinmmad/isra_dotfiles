@@ -7,7 +7,6 @@ Item {
     id: sidebarRoot
 
     property bool open: false
-    property var anchorItem: null
     signal closeRequested()
 
     // ── Datos del clima ──
@@ -17,7 +16,7 @@ Item {
     property string humidity:   "—"
     property string windKmh:    "—"
     property string location:   "Cargando..."
-    property var forecast:      []      // [{date, maxC, minC, desc}]
+    property var forecast:      []
     property bool loading:      true
 
     function conditionEmoji(desc) {
@@ -52,7 +51,6 @@ Item {
                 sidebarRoot.location  = area.areaName[0].value
                                         + ", " + area.country[0].value;
 
-                // Pronóstico 3 días
                 let fc = [];
                 for (let i = 0; i < Math.min(3, data.weather.length); i++) {
                     let w = data.weather[i];
@@ -71,245 +69,133 @@ Item {
         }
     }
 
-    // Refrescar cada 10 minutos
     Timer {
         interval: 600000; running: true; repeat: true; triggeredOnStart: true
         onTriggered: { sidebarRoot.loading = true; weatherProc.running = true; }
     }
 
-    // ── Control de animación de entrada/salida ──
-    property bool popupShowing: false
-
-    onOpenChanged: {
-        if (open) {
-            popupShowing = true;
-        } else {
-            slideOutTimer.start();
-        }
-    }
-
-    Timer {
-        id: slideOutTimer
-        interval: 320
-        onTriggered: sidebarRoot.popupShowing = false
-    }
-
-    // ── Popup principal ──
-    PopupWindow {
-        id: weatherPopup
-        anchor.item: sidebarRoot.anchorItem
-        anchor.edges: Edges.Left
-        anchor.gravity: Edges.Left
-        anchor.adjustment: PopupAdjustment.None
-        implicitWidth: 280
-        implicitHeight: 680
-        visible: sidebarRoot.popupShowing
+    Rectangle {
+        anchors.fill: parent
         color: "transparent"
 
-        Rectangle {
-            id: sidebarBg
+        ColumnLayout {
             anchors.fill: parent
-            color: "#1d1b09"
-            border.color: "#514c1b"
-            border.width: 1
+            anchors.margins: 12
+            spacing: 12
 
-            // Deslizamiento — entra desde la derecha
-            property real slideProgress: (sidebarRoot.open && sidebarRoot.popupShowing) ? 0 : implicitWidth
-            Behavior on slideProgress {
-                NumberAnimation { duration: 320; easing.type: Easing.OutCubic }
-            }
-            transform: Translate { x: sidebarBg.slideProgress }
-            opacity: sidebarRoot.open ? 1.0 : 0.6
-            Behavior on opacity { NumberAnimation { duration: 200 } }
-
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: 16
-                spacing: 14
-
-                // ── Header ──
-                RowLayout {
-                    spacing: 8
-                    Text {
-                        text: "🌡 Clima"
-                        color: "#f0c830"
-                        font.pixelSize: 15; font.bold: true
-                    }
-                    Item { Layout.fillWidth: true }
-                    // Refrescar
-                    Rectangle {
-                        width: 26; height: 26; radius: 13
-                        color: refreshBtn.containsMouse ? "#514c1b" : "#2b2810"
-                        Behavior on color { ColorAnimation { duration: 120 } }
-                        Text {
-                            anchors.centerIn: parent; text: "🔄"; font.pixelSize: 12
-                            RotationAnimation on rotation {
-                                id: spinAnim; from: 0; to: 360; duration: 800
-                                running: sidebarRoot.loading
-                                loops: Animation.Infinite
-                            }
-                        }
-                        MouseArea {
-                            id: refreshBtn; anchors.fill: parent; hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: { sidebarRoot.loading = true; weatherProc.running = true; }
-                        }
-                    }
-                    // Cerrar
-                    Rectangle {
-                        width: 26; height: 26; radius: 13
-                        color: closeBtn.containsMouse ? "#cc6e28" : "#2b2810"
-                        Behavior on color { ColorAnimation { duration: 120 } }
-                        Text { anchors.centerIn: parent; text: "✕"; font.pixelSize: 11; color: "#fef3c7" }
-                        MouseArea {
-                            id: closeBtn; anchors.fill: parent; hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: sidebarRoot.closeRequested()
-                        }
-                    }
-                }
-
-                // Ubicación
+            // Header
+            RowLayout {
+                spacing: 8
                 Text {
-                    text: "📍 " + sidebarRoot.location
-                    color: "#9e8438"; font.pixelSize: 10
-                    elide: Text.ElideRight; Layout.fillWidth: true
+                    text: "🌡 Clima"
+                    color: "#8b4a3f"
+                    font.pixelSize: 14; font.bold: true
                 }
-
-                Rectangle { Layout.fillWidth: true; height: 1; color: "#393616" }
-
-                // ── Temperatura principal ──
+                Item { Layout.fillWidth: true }
+                // Cerrar
                 Rectangle {
-                    Layout.fillWidth: true
-                    height: 110; radius: 16
-                    color: "#2b2810"
-                    border.color: "#514c1b"; border.width: 1
-
-                    ColumnLayout {
-                        anchors.centerIn: parent; spacing: 4
-
-                        Text {
-                            text: sidebarRoot.conditionEmoji(sidebarRoot.condition)
-                            font.pixelSize: 36
-                            Layout.alignment: Qt.AlignHCenter
-                        }
-                        Text {
-                            text: sidebarRoot.tempC
-                            color: "#f0c830"; font.pixelSize: 32; font.bold: true
-                            Layout.alignment: Qt.AlignHCenter
-                        }
-                        Text {
-                            text: sidebarRoot.condition
-                            color: "#ddc880"; font.pixelSize: 11
-                            Layout.alignment: Qt.AlignHCenter
-                            elide: Text.ElideRight
-                        }
+                    width: 24; height: 24; radius: 12
+                    color: closeBtn.containsMouse ? "#cc6e28" : "#efe4d4"
+                    Behavior on color { ColorAnimation { duration: 120 } }
+                    Text { anchors.centerIn: parent; text: "✕"; font.pixelSize: 10; color: "#1f1b16" }
+                    MouseArea {
+                        id: closeBtn; anchors.fill: parent; hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: sidebarRoot.closeRequested()
                     }
-                }
-
-                // ── Detalles ──
-                GridLayout {
-                    columns: 2; columnSpacing: 8; rowSpacing: 8
-                    Layout.fillWidth: true
-
-                    // Sensación térmica
-                    Rectangle {
-                        Layout.fillWidth: true; height: 44; radius: 10
-                        color: "#2b2810"; border.color: "#393616"; border.width: 1
-                        ColumnLayout {
-                            anchors.centerIn: parent; spacing: 2
-                            Text { text: "🌡 Sensación"; color: "#9e8438"; font.pixelSize: 9; Layout.alignment: Qt.AlignHCenter }
-                            Text { text: sidebarRoot.feelsLike; color: "#fef3c7"; font.pixelSize: 14; font.bold: true; Layout.alignment: Qt.AlignHCenter }
-                        }
-                    }
-
-                    // Humedad
-                    Rectangle {
-                        Layout.fillWidth: true; height: 44; radius: 10
-                        color: "#2b2810"; border.color: "#393616"; border.width: 1
-                        ColumnLayout {
-                            anchors.centerIn: parent; spacing: 2
-                            Text { text: "💧 Humedad"; color: "#9e8438"; font.pixelSize: 9; Layout.alignment: Qt.AlignHCenter }
-                            Text { text: sidebarRoot.humidity; color: "#fef3c7"; font.pixelSize: 14; font.bold: true; Layout.alignment: Qt.AlignHCenter }
-                        }
-                    }
-
-                    // Viento
-                    Rectangle {
-                        Layout.columnSpan: 2; Layout.fillWidth: true; height: 44; radius: 10
-                        color: "#2b2810"; border.color: "#393616"; border.width: 1
-                        RowLayout {
-                            anchors.centerIn: parent; spacing: 8
-                            Text { text: "💨 Viento"; color: "#9e8438"; font.pixelSize: 9 }
-                            Text { text: sidebarRoot.windKmh; color: "#fef3c7"; font.pixelSize: 14; font.bold: true }
-                        }
-                    }
-                }
-
-                Rectangle { Layout.fillWidth: true; height: 1; color: "#393616" }
-
-                // ── Pronóstico 3 días ──
-                Text {
-                    text: "Próximos días"
-                    color: "#9e8438"; font.pixelSize: 10; font.bold: true
-                }
-
-                Repeater {
-                    model: sidebarRoot.forecast.length
-
-                    Rectangle {
-                        required property int index
-                        property var day: sidebarRoot.forecast[index]
-                        Layout.fillWidth: true; height: 44; radius: 10
-                        color: "#2b2810"; border.color: "#393616"; border.width: 1
-
-                        RowLayout {
-                            anchors.fill: parent; anchors.margins: 10; spacing: 8
-
-                            Text {
-                                text: sidebarRoot.conditionEmoji(day.desc)
-                                font.pixelSize: 18
-                            }
-                            Column {
-                                spacing: 1
-                                Text {
-                                    text: Qt.formatDate(new Date(day.date), "ddd d MMM")
-                                    color: "#fef3c7"; font.pixelSize: 11; font.bold: true
-                                }
-                                Text {
-                                    text: day.desc
-                                    color: "#9e8438"; font.pixelSize: 9
-                                    elide: Text.ElideRight
-                                    width: 120
-                                }
-                            }
-                            Item { Layout.fillWidth: true }
-                            Column {
-                                spacing: 1; Layout.alignment: Qt.AlignVCenter
-                                Text {
-                                    text: day.maxC + "°"
-                                    color: "#f0c830"; font.pixelSize: 13; font.bold: true
-                                    anchors.right: parent.right
-                                }
-                                Text {
-                                    text: day.minC + "°"
-                                    color: "#9e8438"; font.pixelSize: 10
-                                    anchors.right: parent.right
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Item { Layout.fillHeight: true }
-
-                // Nota al pie
-                Text {
-                    text: "Datos: wttr.in"
-                    color: "#514c1b"; font.pixelSize: 9
-                    Layout.alignment: Qt.AlignHCenter
                 }
             }
+
+            Text {
+                text: "📍 " + sidebarRoot.location
+                color: "#9e8438"; font.pixelSize: 9
+                elide: Text.ElideRight; Layout.fillWidth: true
+            }
+
+            Rectangle { Layout.fillWidth: true; height: 1; color: "#e8dccb" }
+
+            // Temp Principal
+            Rectangle {
+                Layout.fillWidth: true
+                height: 90; radius: 14
+                color: "#efe4d4"
+                border.color: "#8b7355"; border.width: 1
+
+                ColumnLayout {
+                    anchors.centerIn: parent; spacing: 2
+
+                    Text {
+                        text: sidebarRoot.conditionEmoji(sidebarRoot.condition)
+                        font.pixelSize: 32; Layout.alignment: Qt.AlignHCenter
+                    }
+                    Text {
+                        text: sidebarRoot.tempC
+                        color: "#8b4a3f"; font.pixelSize: 28; font.bold: true; Layout.alignment: Qt.AlignHCenter
+                    }
+                    Text {
+                        text: sidebarRoot.condition
+                        color: "#5c5248"; font.pixelSize: 10; Layout.alignment: Qt.AlignHCenter
+                        elide: Text.ElideRight; width: 200
+                    }
+                }
+            }
+
+            // Detalles
+            GridLayout {
+                columns: 2; columnSpacing: 6; rowSpacing: 6
+                Layout.fillWidth: true
+
+                Rectangle {
+                    Layout.fillWidth: true; height: 40; radius: 8
+                    color: "#efe4d4"; border.color: "#e8dccb"; border.width: 1
+                    ColumnLayout {
+                        anchors.centerIn: parent; spacing: 1
+                        Text { text: "🌡 Sensación"; color: "#9e8438"; font.pixelSize: 8; Layout.alignment: Qt.AlignHCenter }
+                        Text { text: sidebarRoot.feelsLike; color: "#1f1b16"; font.pixelSize: 12; font.bold: true; Layout.alignment: Qt.AlignHCenter }
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true; height: 40; radius: 8
+                    color: "#efe4d4"; border.color: "#e8dccb"; border.width: 1
+                    ColumnLayout {
+                        anchors.centerIn: parent; spacing: 1
+                        Text { text: "💧 Humedad"; color: "#9e8438"; font.pixelSize: 8; Layout.alignment: Qt.AlignHCenter }
+                        Text { text: sidebarRoot.humidity; color: "#1f1b16"; font.pixelSize: 12; font.bold: true; Layout.alignment: Qt.AlignHCenter }
+                    }
+                }
+            }
+
+            Rectangle { Layout.fillWidth: true; height: 1; color: "#e8dccb" }
+
+            // Pronóstico
+            Text {
+                text: "Próximos días"
+                color: "#9e8438"; font.pixelSize: 9; font.bold: true
+            }
+
+            Repeater {
+                model: sidebarRoot.forecast.length
+                Rectangle {
+                    required property int index
+                    property var day: sidebarRoot.forecast[index]
+                    Layout.fillWidth: true; height: 38; radius: 8
+                    color: "#efe4d4"; border.color: "#e8dccb"; border.width: 1
+                    RowLayout {
+                        anchors.fill: parent; anchors.margins: 8; spacing: 6
+                        Text { text: sidebarRoot.conditionEmoji(day.desc); font.pixelSize: 16 }
+                        Column {
+                            spacing: 0
+                            Text { text: Qt.formatDate(new Date(day.date), "ddd d MMM"); color: "#1f1b16"; font.pixelSize: 10; font.bold: true }
+                            Text { text: day.desc; color: "#9e8438"; font.pixelSize: 8; elide: Text.ElideRight; width: 100 }
+                        }
+                        Item { Layout.fillWidth: true }
+                        Text { text: day.maxC + "°"; color: "#8b4a3f"; font.pixelSize: 12; font.bold: true }
+                    }
+                }
+            }
+
+            Item { Layout.fillHeight: true }
         }
     }
 }
