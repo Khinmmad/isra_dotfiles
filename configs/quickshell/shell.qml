@@ -4,9 +4,10 @@ import Quickshell
 import Quickshell.Wayland
 
 ShellRoot {
-    readonly property int fw: 10
-    readonly property int fr: 24
+    readonly property int fw: 12
+    readonly property int fr: 36
     readonly property color bg: "#f5ede4"
+    readonly property color frameEdge: Qt.darker(bg, 1.22)
     readonly property int leftBase: 64
 
     property int expansionW: (appMenu.active || weatherSidebar.open || clockModule.drawerOpen) ? 320 : 0
@@ -20,11 +21,10 @@ ShellRoot {
         Rectangle {
             anchors.fill: parent
             color: bg
+            bottomLeftRadius: fr
             bottomRightRadius: fr
-            Rectangle {
-                anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
-                height: 1; color: Qt.darker(bg, 1.08)
-            }
+            border.width: 1
+            border.color: frameEdge
         }
     }
 
@@ -45,17 +45,16 @@ ShellRoot {
         Rectangle {
             anchors.fill: parent
             color: bg
+            topLeftRadius: fr
             topRightRadius: fr
             clip: true
-
-            Rectangle {
-                anchors { top: parent.top; left: parent.left; right: parent.right }
-                height: 1; color: Qt.darker(bg, 1.08)
-            }
+            border.width: 1
+            border.color: frameEdge
 
             Dock {
                 id: dock
                 anchors.fill: parent
+                anchors.margins: 1
             }
         }
     }
@@ -69,12 +68,10 @@ ShellRoot {
         Rectangle {
             anchors.fill: parent
             color: bg
-            topLeftRadius: fw
-            bottomLeftRadius: fw
-            Rectangle {
-                anchors { left: parent.left; top: parent.top; bottom: parent.bottom }
-                width: 1; color: Qt.darker(bg, 1.08)
-            }
+            topLeftRadius: fr
+            bottomLeftRadius: fr
+            border.width: 1
+            border.color: frameEdge
         }
     }
 
@@ -98,11 +95,8 @@ ShellRoot {
             color: bg
             topRightRadius: fr
             bottomRightRadius: fr
-
-            Rectangle {
-                anchors { right: parent.right; top: parent.top; bottom: parent.bottom }
-                width: 2; color: Qt.darker(bg, 1.06)
-            }
+            border.width: 1
+            border.color: frameEdge
 
             RowLayout {
                 anchors.fill: parent
@@ -125,7 +119,7 @@ ShellRoot {
                         MouseArea {
                             id: logoArea; anchors.fill: parent
                             hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                            onClicked: { weatherSidebar.open = false; appMenu.active = !appMenu.active }
+                            onClicked: { weatherSidebar.open = false; deviceMgr.drawerOpen = false; appMenu.active = !appMenu.active }
                         }
                     }
 
@@ -140,6 +134,17 @@ ShellRoot {
                     NetworkStatus { Layout.alignment: Qt.AlignHCenter }
                     Music         { Layout.alignment: Qt.AlignHCenter }
                     SystemInfo    { Layout.alignment: Qt.AlignHCenter }
+                    DeviceManager {
+                        id: deviceMgr
+                        Layout.alignment: Qt.AlignHCenter
+                        onDrawerOpenChanged: {
+                            if (drawerOpen) {
+                                appMenu.active = false
+                                weatherSidebar.open = false
+                                clockModule.drawerOpen = false
+                            }
+                        }
+                    }
 
                     Rectangle {
                         id: weatherBtnContainer
@@ -151,7 +156,7 @@ ShellRoot {
                         MouseArea {
                             id: weatherBtn; anchors.fill: parent
                             hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                            onClicked: { appMenu.active = false; weatherSidebar.open = !weatherSidebar.open }
+                            onClicked: { appMenu.active = false; deviceMgr.drawerOpen = false; weatherSidebar.open = !weatherSidebar.open }
                         }
                     }
 
@@ -160,7 +165,7 @@ ShellRoot {
                         Layout.alignment: Qt.AlignHCenter
                         MouseArea {
                             anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                            onClicked: { appMenu.active = false; weatherSidebar.open = false; clockModule.drawerOpen = !clockModule.drawerOpen }
+                            onClicked: { appMenu.active = false; weatherSidebar.open = false; deviceMgr.drawerOpen = false; clockModule.drawerOpen = !clockModule.drawerOpen }
                         }
                     }
                 }
